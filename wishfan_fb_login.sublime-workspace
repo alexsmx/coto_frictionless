@@ -1,0 +1,595 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"facebook",
+				"facebookuser"
+			],
+			[
+				"publis",
+				"publishInFacebook2"
+			],
+			[
+				"Fb",
+				"FBgetUserData"
+			],
+			[
+				"FB",
+				"FBgetUserData"
+			],
+			[
+				"first",
+				"first_name"
+			],
+			[
+				"post",
+				"postid"
+			],
+			[
+				"logg",
+				"logged_on_server"
+			],
+			[
+				"ema",
+				"email2"
+			],
+			[
+				"user",
+				"username2"
+			],
+			[
+				"last",
+				"last_name2"
+			],
+			[
+				"midd",
+				"middle_name2"
+			],
+			[
+				"firt",
+				"first_name"
+			],
+			[
+				"las",
+				"last_name"
+			],
+			[
+				"monto",
+				"monto_formato"
+			],
+			[
+				"format",
+				"formato"
+			],
+			[
+				"Time",
+				"DateTimeProperty"
+			],
+			[
+				"Base",
+				"BaseHandler"
+			],
+			[
+				"String",
+				"StringProperty"
+			],
+			[
+				"app",
+				"fb_appid"
+			],
+			[
+				"fb_",
+				"fb_appid"
+			],
+			[
+				"redirect",
+				"redirect_to"
+			],
+			[
+				"rememb",
+				"remember_me"
+			],
+			[
+				"redire",
+				"redirect_to"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "app.yaml",
+			"settings":
+			{
+				"buffer_size": 2037,
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "",
+	"command_palette":
+	{
+		"height": 87.0,
+		"selected_items":
+		[
+			[
+				"comm",
+				"Toggle Comment"
+			]
+		],
+		"width": 575.0
+	},
+	"console":
+	{
+		"height": 0.0
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/Users/alexs_mx/Dropbox/banwire/PAGO-PRO/API_PAGO-PRO.php",
+		"/Users/alexs_mx/Dropbox/banwire/banwire",
+		"/Users/alexs_mx/Dropbox/codigo_frecuencias/code/SP_Cod_frec_algoritmo.txt",
+		"/Users/alexs_mx/Dropbox/codigo_frecuencias/code/sp_llena_frec.txt",
+		"/Users/alexs_mx/git/regalame/gae-boilerplate/templates/boilerplate_pagar.html",
+		"/Users/alexs_mx/git/regalame/gae-boilerplate/templates/boilerplate_private_products.html",
+		"/Users/alexs_mx/git/regalame/gae-boilerplate/templates/boilerplate_first_product.html",
+		"/Users/alexs_mx/git/regalame/gae-boilerplate/routes.py",
+		"/Users/alexs_mx/git/regalame/gae-boilerplate/web/handlers.py",
+		"/Users/alexs_mx/git/regalame/gae-boilerplate/templates/boilerplate_regalos.html",
+		"/Users/alexs_mx/git/regalame/gae-boilerplate/config.py",
+		"/Users/alexs_mx/git/regalame/gae-boilerplate/templates/boilerplate_contact.html",
+		"/Users/alexs_mx/git/regalame/gae-boilerplate/models/models.py",
+		"/Users/alexs_mx/git/regalame/gae-boilerplate/models/__init__.py",
+		"/Users/alexs_mx/git/regalame/gae-boilerplate/models/newmodels.py",
+		"/Users/alexs_mx/git/regalame/gae-boilerplate/templates/base.html",
+		"/Users/alexs_mx/git/regalame/gae-boilerplate/lib/basehandler.py",
+		"/Users/alexs_mx/git/regalame/gae-boilerplate/static/css/main.css",
+		"/Users/alexs_mx/git/regalame/gae-boilerplate/templates/boilerplate_home.html",
+		"/Users/alexs_mx/git/regalame/gae-boilerplate/static/css/style.css",
+		"/Users/alexs_mx/git/regalame/gae-boilerplate/app.yaml",
+		"/Users/alexs_mx/git/regalame/gae-boilerplate/templates/errors/timeout.html",
+		"/Users/alexs_mx/git/regalame/gae-boilerplate/main.py",
+		"/Users/alexs_mx/git/regalame/gae-boilerplate/static/img/bridal-shower-favor.jpg",
+		"/Users/alexs_mx/git/regalame/gae-boilerplate/templates/boilerplate_secure_zone.html",
+		"/Users/alexs_mx/git/regalame/gae-boilerplate/templates/macros.html",
+		"/Users/alexs_mx/git/regalame/gae-boilerplate/lib/twitter.py",
+		"/Users/alexs_mx/git/regalame/gae-boilerplate/templates/boilerplate_edit_profile.html",
+		"/Users/alexs_mx/git/regalame/gae-boilerplate/static/channel.html",
+		"/Users/alexs_mx/git/regalame/gae-boilerplate/templates/boilerplate_register.html",
+		"/Users/alexs_mx/Downloads/audio/example_09 - Stand by My Woman.htm",
+		"/Users/alexs_mx/git/regalame/gae-boilerplate/templates/boilerplate_login.html",
+		"/Users/alexs_mx/git/regalame/gae-boilerplate/lib/utils.py",
+		"/Users/alexs_mx/git/regalame/gae-boilerplate/static/css/bootstrap.css",
+		"/Users/alexs_mx/git/regalame/gae-boilerplate/static/css/bootstrap-responsive.css",
+		"/Users/alexs_mx/git/regalame/esq_gae_fb/app.yaml",
+		"/Users/alexs_mx/git/gaeoriginalboilerplate/app.yaml",
+		"/Users/alexs_mx/git/gae-boilerplate/templates/boilerplate_portfolio.html",
+		"/Users/alexs_mx/git/gae-boilerplate/config.py",
+		"/Users/alexs_mx/git/gae-boilerplate/app.yaml",
+		"/Users/alexs_mx/git/gae-boilerplate/templates/boilerplate_home.html",
+		"/Users/alexs_mx/git/twitter-bootstrap-41d3220/js/bootstrap-typeahead.js"
+	],
+	"find":
+	{
+		"height": 35.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"encode",
+			"SC",
+			"sc",
+			"ContactHandler",
+			"private",
+			"fbuserid",
+			"private",
+			"routes",
+			"fb.ui",
+			"image_url",
+			"SingleItemCampaing",
+			"image_url",
+			"SingleItemCampaing",
+			"NewDbProductCampaignHandler",
+			"sendFBLoginDataToServer",
+			"nDataToServer",
+			"sendfblogindata",
+			"connected",
+			"getLoginStatus",
+			"fb.logout",
+			"single",
+			"SingleItemCampaing",
+			"LogVisit",
+			"timestamp",
+			"publishinfaceb",
+			"fblogindata2\\\\.",
+			"loginfacebook",
+			"fblogindata",
+			"form",
+			"facebook",
+			"css",
+			"PrivateProductsHandler",
+			"form",
+			"url",
+			"@",
+			"                ",
+			"user.name",
+			"                ",
+			"ui",
+			"fecha",
+			"datepicker",
+			"elegirregalo",
+			"thumbnail",
+			"\"/>\n",
+			"url",
+			"li",
+			"age",
+			"Login",
+			"login",
+			"auth-loginlink",
+			"auth-logoutlink",
+			"logout",
+			"auth-loginlink",
+			"login",
+			"tabs",
+			"LoginFacebookHandler",
+			"fblogindata",
+			"                    <button onclick=\"$('#fblogindata').submit(); \" class=\"btn btn-primary btn-login\">{% trans %}Entrar{% endtrans %}</button>                    <button onclick=\"$('#fblogindata').submit(); \" class=\"btn btn-primary btn-login\">{% trans %}Entrar{% endtrans %}</button>\n               fblogindata",
+			"                    <button onclick=\"$('#fblogindata').submit(); \" class=\"btn btn-primary btn-login\">{% trans %}Entrar{% endtrans %}</button>                    <button onclick=\"$('#fblogindata').submit(); \" class=\"btn btn-primary btn-login\">{% trans %}Entrar{% endtrans %}</button>\n                fblogindata",
+			"l_user_id",
+			"render_template",
+			"render",
+			"channel",
+			"logging",
+			"MASONRY",
+			"block",
+			"logout",
+			"logout_url",
+			"logout",
+			"EditProfileHandler",
+			"auth_id",
+			"db_user",
+			"utils.encry",
+			"id",
+			"self.request",
+			"csrf_token",
+			"post",
+			"logging",
+			"Access was denied to this",
+			"access denied",
+			"acces denied",
+			"acced denied",
+			"get_by_auth_id",
+			"auth-loginlink",
+			"LoginHandler",
+			"loginhandler",
+			"auth-status",
+			"facebook",
+			"twitter",
+			">\n",
+			"federate",
+			"provider",
+			"provider_info",
+			"facebook",
+			"brand",
+			"ie7",
+			"ie8",
+			"ie7",
+			"login",
+			"page",
+			"body",
+			"home",
+			"login",
+			"body",
+			"brand",
+			"route",
+			"secure_scheme",
+			"h2",
+			"bazzar",
+			"                            <",
+			"<img",
+			"webapp2_config"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "app.yaml",
+					"settings":
+					{
+						"buffer_size": 2037,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/YAML/YAML.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 34.0
+	},
+	"input":
+	{
+		"height": 31.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.exec":
+	{
+		"height": 100.0
+	},
+	"replace":
+	{
+		"height": 0.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+			[
+				"contact",
+				"templates/boilerplate_contact.html"
+			],
+			[
+				"rout",
+				"routes_presentacion.py"
+			],
+			[
+				"route",
+				"routes.py"
+			],
+			[
+				"cont",
+				"templates/boilerplate_contact.html"
+			],
+			[
+				"conta",
+				"templates/boilerplate_contact.html"
+			],
+			[
+				"config",
+				"config.py"
+			],
+			[
+				"reg",
+				"templates/boilerplate_regalos.html"
+			],
+			[
+				"handl",
+				"web/handlers.py"
+			],
+			[
+				"first",
+				"templates/boilerplate_first_product.html"
+			],
+			[
+				"handler",
+				"web/handlers.py"
+			],
+			[
+				"basehan",
+				"lib/basehandler.py"
+			],
+			[
+				"handle",
+				"web/handlers.py"
+			],
+			[
+				"hand",
+				"web/handlers.py"
+			],
+			[
+				"priva",
+				"templates/boilerplate_private_products.html"
+			],
+			[
+				"model",
+				"models/models.py"
+			],
+			[
+				"rou",
+				"routes.py"
+			],
+			[
+				"fisrt",
+				"templates/boilerplate_first_product.html"
+			],
+			[
+				"base",
+				"templates/base.html"
+			],
+			[
+				"home",
+				"templates/boilerplate_home.html"
+			],
+			[
+				"mode",
+				"models/models.py"
+			],
+			[
+				"baseh",
+				"lib/basehandler.py"
+			],
+			[
+				"priv",
+				"templates/boilerplate_private_products.html"
+			],
+			[
+				"main",
+				"static/css/main.css"
+			],
+			[
+				"sty",
+				"static/css/style.css"
+			],
+			[
+				"css",
+				"static/css/main.css"
+			],
+			[
+				"confi",
+				"config.py"
+			],
+			[
+				"app",
+				"app.yaml"
+			],
+			[
+				"private",
+				"templates/boilerplate_private_products.html"
+			],
+			[
+				"bas",
+				"templates/base.html"
+			],
+			[
+				"mod",
+				"models/models.py"
+			],
+			[
+				"arout",
+				"templates/errors/timeout.html"
+			],
+			[
+				"con",
+				"config.py"
+			],
+			[
+				"conf",
+				"config.py"
+			],
+			[
+				"h",
+				"templates/boilerplate_home.html"
+			],
+			[
+				"macro",
+				"templates/macros.html"
+			],
+			[
+				"ho",
+				"templates/boilerplate_home.html"
+			],
+			[
+				"hom",
+				"templates/boilerplate_home.html"
+			],
+			[
+				"respons",
+				"static/css/bootstrap-responsive.css"
+			],
+			[
+				"boos",
+				"static/css/bootstrap.css"
+			],
+			[
+				"a",
+				"app.yaml"
+			],
+			[
+				"port",
+				"templates/boilerplate_portfolio.html"
+			],
+			[
+				"boi",
+				"templates/boilerplate_home.html"
+			],
+			[
+				"read",
+				"js/README.md"
+			]
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"show_minimap": true,
+	"show_open_files": true,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 335.0,
+	"status_bar_visible": true
+}
