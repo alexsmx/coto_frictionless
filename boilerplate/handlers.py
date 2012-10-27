@@ -12,6 +12,9 @@
 import logging
 import re
 import json
+import uuid
+import urllib
+import simplejson
 
 # related third party imports
 import webapp2
@@ -20,12 +23,17 @@ from webapp2_extras import security
 from webapp2_extras.auth import InvalidAuthIdError, InvalidPasswordError
 from webapp2_extras.i18n import gettext as _
 from webapp2_extras.appengine.auth.models import Unique
+from google.appengine.ext import blobstore
+from google.appengine.ext.webapp import blobstore_handlers
+from google.appengine.api import images
 from google.appengine.api import taskqueue
+from google.appengine.api import urlfetch
 from linkedin import linkedin
 
 # local application/library specific imports
 import config, models
 import forms as forms
+
 from lib import utils, captcha, twitter
 from lib.basehandler import BaseHandler
 from lib.basehandler import user_required
@@ -228,7 +236,20 @@ class SocialLoginHandler(BaseHandler):
             message = _('Federated login is disabled.')
             self.add_message(message, 'warning')
             return self.redirect_to('login')
-        callback_url = "%s/social_login/%s/complete" % (self.request.host_url, provider_name)
+
+        redirect_params=''
+        process_name=''
+        if self.request.GET.get('process_name'):
+            process_name=self.request.GET.get('process_name')
+
+
+        if self.request.GET.get('img_tmp_id'):
+            redirect_params='?img_tmp_id='  + self.request.GET.get('img_tmp_id') + '&step=4'
+        
+        if process_name!='':
+                redirect_params=redirect_params + '&process_name=' + process_name
+
+        callback_url = "%s/social_login/%s/complete%s" % (self.request.host_url, provider_name, redirect_params)
 
         if provider_name == "twitter":
             twitter_helper = twitter.TwitterAuth(self, redirect_uri=callback_url)
@@ -236,7 +257,7 @@ class SocialLoginHandler(BaseHandler):
 
         elif provider_name == "facebook":
             self.session['linkedin'] = None
-            perms = ['email', 'publish_stream']
+            perms = ['email', 'publish_stream', 'friends_birthday', 'user_birthday', 'friends_about_me','friends_likes','friends_checkins','friends_events','friends_interests']
             self.redirect(facebook.auth_url(config._FbApiKey, callback_url, perms))
 
         elif provider_name == 'linkedin':
@@ -254,6 +275,13 @@ class SocialLoginHandler(BaseHandler):
 
 
 class CallbackSocialLoginHandler(BaseHandler):
+    """
+    updateTmpImageWithUser 
+    """
+    def updateTmpImageWithUser(self,user, tmp_id):
+        temp_item = models.ItemEvent.query(models.ItemEvent.temp_id==tmp_id).get()
+        temp_item.user=user.key
+        temp_item.put()
     """
     Callback (Save Information) for Social Authentication
     """
@@ -315,23 +343,67 @@ class CallbackSocialLoginHandler(BaseHandler):
         #facebook association
         elif provider_name == "facebook":
             code = self.request.get('code')
-            callback_url = "%s/social_login/%s/complete" % (self.request.host_url, provider_name)
-            token = facebook.get_access_token_from_code(code, callback_url, config._FbApiKey, config._FbSecret)
+            #If user not authorizes then the code does not exists, instead there is an answer in this form: 
+            # YOUR_REDIRECT_URI?
+            # error_reason=user_denied
+            # &error=access_denied
+            # &error_description=The+user+denied+your+request.
+            # &state=YOUR_STATE_VALUE
+            redirect_params=''
+            img_tmp_id=''
+            process_name=''
+            if self.request.GET.get('process_name'):
+                process_name=self.request.GET.get('process_name')
+
+            if self.request.GET.get('img_tmp_id'):
+                img_tmp_id=self.request.GET.get('img_tmp_id')
+                redirect_params='?img_tmp_id='  + self.request.GET.get('img_tmp_id') + '&step=4'
+
+            if process_name!='':
+                redirect_params=redirect_params + '&process_name=' + process_name
+
+            callback_url = "%s/social_login/%s/complete%s" % (self.request.host_url, provider_name, redirect_params)
+            try:
+                token = facebook.get_access_token_from_code(code, callback_url, config._FbApiKey, config._FbSecret)
+            except Exception as e:
+                logging.error("error getting facebook token: %s" % e)
+                message = _('Failed to login with Facebook. Try another method. %s ' % config.app_name)
+                self.add_message(message, 'warning')
+                if img_tmp_id == '':
+                    return self.redirect_to('home')
+                else:
+                    if process_name=='pagoparticipacion':
+                        return self.redirect(self.uri_for('participate_in_event') + redirect_params + '&result=error_login')
+                    else:
+                        return self.redirect(self.uri_for('first-product') + redirect_params)
+            #if we have a token, then we are going to check if we can have a user,
+            #in anycase whenever we have an img_tmp_id and get a grip of a user, we are going to 
+            #update the user keyproperty there, we also grab the token an token expiration for the rest of 
+            #the use case
             access_token = token['access_token']
+            token_expires= long(token['expires'])
             fb = facebook.GraphAPI(access_token)
             user_data = fb.get_object('me')
+            profile_picture=fb.get_object('me/picture')
+            logging.info(profile_picture['url'])
             #this is checking if you're already logged in , maybe with a registered user
             #cause if your are, then all you have to do is an association with that already 
             #registered user.
             if self.user:
                 # new association with facebook
                 user_info = models.User.get_by_id(long(self.user_id))
+                if img_tmp_id !='':
+                    if process_name!='pagoparticipacion':
+                        self.updateTmpImageWithUser(user_info, img_tmp_id)
                 if models.SocialUser.check_unique(user_info.key, 'facebook', str(user_data['id'])):
                     social_user = models.SocialUser(
                         user = user_info.key,
                         provider = 'facebook',
                         uid = str(user_data['id']),
-                        extra_data = user_data
+                        extra_data = user_data,
+                        auth_token=access_token,
+                        expires=token_expires,
+                        profile_picture_url=profile_picture['url']
                     )
                     social_user.put()
 
@@ -350,8 +422,16 @@ class CallbackSocialLoginHandler(BaseHandler):
                 #here it is checking if there is association, if not, the regular path is to send you to 
                 #register and login (IMHO: friction!)
                 if social_user:
+                    #we update token and expire
+                    social_user.auth_token= access_token
+                    social_user.expires= token_expires
+                    social_user.put()
                     # Social user exists. Need authenticate related site account
                     user = social_user.user.get()
+                    #if we have an image, we update user key
+                    if img_tmp_id !='':
+                        if process_name!='pagoparticipacion':
+                            self.updateTmpImageWithUser(user, img_tmp_id)
                     self.auth.set_session(self.auth.store.user_to_dict(user), remember=True)
                     logVisit = models.LogVisit(
                         user = user.key,
@@ -360,18 +440,31 @@ class CallbackSocialLoginHandler(BaseHandler):
                         timestamp = utils.get_date_time()
                     )
                     logVisit.put()
-                    self.redirect_to('home')
+                    logging.info('img_tmp_id OJO:%s' % img_tmp_id)
+                    logging.info('process_name OJO:%s' % process_name)
+                    if img_tmp_id !='':
+                        if process_name=='pagoparticipacion':
+                            strredirect= self.uri_for('pay_for_event') + redirect_params 
+                            logging.info(' OJO1:%s' % strredirect)
+                            return self.redirect(self.uri_for('pay_for_event') + redirect_params )
+                        else:
+                            logging.info(' OJO2:')
+                            return self.redirect(self.uri_for('first-product') + redirect_params)
+                    else:
+                        logging.info(' OJO3:')
+                        self.redirect_to('home')
                 else:
                     # Social user does not exists. Need show login and registration forms
                     
                     #we are already writing data into a session,
                     self.session['facebook']=json.dumps(user_data)
-                    # here is the friction we want to remove
+                    # here is the friction we want to remove so we setup a False if, to jump this section
                     if False:
                         login_url = '%s/login/'  % self.request.host_url
                         signup_url = '%s/register/' %  self.request.host_url
                         message = _('The Facebook account isn\'t associated with any local account. If you already have a Google App Engine Boilerplate Account, you have <a href="%s">sign in here</a> or <a href="%s">Create an account</a>') % (login_url, signup_url)
                         self.add_message(message,'info')
+                        logging.info(' OJO4:')
                         self.redirect_to('login')
                     # use facebook user info to create a user, validate, login, 
                     # create a social user and associate and go on with your life!
@@ -380,7 +473,10 @@ class CallbackSocialLoginHandler(BaseHandler):
                     fb_last_name=user_data['last_name'].strip()
                     fb_email=user_data['email'].strip()
                     fb_password=utils.random_string()
-                    fb_country=user_data['hometown']['name'].strip()
+                    try:
+                        fb_country=user_data['hometown']['name'].strip()
+                    except Exception as e: 
+                        fb_country=''
                     # Password to SHA512
                     fb_password = utils.hashing(fb_password, config.salt)
                     # Passing password_raw=password so password will be hashed
@@ -407,6 +503,10 @@ class CallbackSocialLoginHandler(BaseHandler):
                         #user registered correctly, login.
                         try:
                             user_info = models.User.get_by_email(fb_email)
+                            #if we have temporal image we store it
+                            if img_tmp_id !='':
+                                if process_name!='pagoparticipacion':
+                                    self.updateTmpImageWithUser(user_info, img_tmp_id)
                             db_user = self.auth.get_user_by_password(user[1].auth_ids[0], fb_password)
                             fb_data = json.loads(self.session['facebook'])
                             if fb_data is not None:
@@ -415,16 +515,29 @@ class CallbackSocialLoginHandler(BaseHandler):
                                         user = user_info.key,
                                         provider = 'facebook',
                                         uid = str(fb_data['id']),
-                                        extra_data = fb_data
+                                        extra_data = fb_data,
+                                        auth_token=access_token,
+                                        expires=token_expires,
+                                        profile_picture_url=profile_picture['url']
                                     )
                                     social_user.put()
                             message = _('Welcome %s, you are now logged in.' % '<strong>{0:>s}</strong>'.format(fb_username) )
                             self.add_message(message, 'success')
-                            return self.redirect_to('home')
+                            if img_tmp_id == '':
+                                logging.info(' OJO6:')
+                                return self.redirect_to('home')
+                            else:
+                                if process_name=='pagoparticipacion':
+                                    logging.info(' OJO7:')
+                                    return self.redirect(self.uri_for('pay_for_event') + redirect_params)
+                                else:
+                                    logging.info(' OJO8:')
+                                    return self.redirect(self.uri_for('first-product') + redirect_params)
                         except (AttributeError, KeyError), e:
                             logging.error('Unexpected error creating the user %s: %s' % (fb_username, e ))
                             message = _('Unexpected error creating the user %s' % fb_username )
                             self.add_message(message, 'error')
+                            logging.info(' OJO9:')
                             return self.redirect_to('home')
 
             #end facebook
@@ -636,7 +749,7 @@ class LogoutHandler(BaseHandler):
         self.auth.unset_session()
         # User is logged out, let's try redirecting to login page
         try:
-            self.redirect(self.auth_config['login_url'])
+            self.redirect(self.auth_config['home_url'])
         except (AttributeError, KeyError), e:
             logging.error("Error logging out: %s" % e)
             message = _("User is logged out, but there was an error on the redirection.")
@@ -1392,5 +1505,336 @@ class HomeRequestHandler(RegisterBaseHandler):
 
     def get(self):
         """ Returns a simple HTML form for home """
-        params = {}
-        return self.render_template('boilerplate_home.html', **params)
+        logging.info('Existe usuario?: %s' % self.user)
+        if self.user:
+            params = {}
+            params={}
+            user_info = models.User.get_by_id(long(self.user_id))
+            productos=models.ItemEvent.query(models.ItemEvent.user==user_info.key, models.ItemEvent.visible==True)
+            payload=dict(productos=productos)
+            params=payload
+            return self.render_template('boilerplate_private_products.html', **params)
+        else:
+            params = {}
+            return self.render_template('boilerplate_home.html', **params)    
+        
+
+
+class FirstProductHandler(RegisterBaseHandler):
+    def get(self):
+        tipo = self.request.GET.get('tipo')
+        img_tmp_id=''
+        paso=''
+        tmp_producto_id = uuid.uuid1()
+        params={}
+        params['tipo']=tipo
+        if self.request.GET.get('step'):
+            paso=self.request.GET.get('step')
+            params['paso']=paso
+
+        if self.request.GET.get('img_tmp_id'):
+            img_tmp_id=self.request.GET.get('img_tmp_id')
+            params['img_tmp_id']=img_tmp_id
+            tmp_producto_id=img_tmp_id
+            params['isrevisit']=1
+            saved_item= models.ItemEvent.query(models.ItemEvent.temp_id==img_tmp_id).get()
+            params['saved_item']=saved_item
+
+        params['tmp_producto_id']=tmp_producto_id
+        upload_url = blobstore.create_upload_url('/upload/')
+        params["upload_url"]= upload_url
+        return self.render_template('boilerplate_first_product.html', **params)
+
+class UploadHandler(blobstore_handlers.BlobstoreUploadHandler):
+    def post(self):
+        upload_files = self.get_uploads('file')  # 'file' is file upload field in the form
+        blob_info = upload_files[0]
+        blob_key=blob_info.key()
+        logging.info("Blob resource %s" % blob_key)
+        #img= images.Image(blob_key)
+        serving_url= images.get_serving_url(blob_key)
+        logging.info("Serving url %s" % serving_url)
+        self.response.out.write(serving_url)
+        #self.redirect('/serve/%s' % blob_info.key())
+
+class getUploadURLHandler(BaseHandler):
+    def get(self):
+        upload_url = blobstore.create_upload_url('/upload/')
+        self.response.out.write(upload_url)
+
+class getGuid(BaseHandler):
+    def get(self):
+        str_guid= uuid.uuid1()
+        self.response.out.write(str_guid)
+
+
+
+class testNDBModelRequestHandler(BaseHandler): 
+    def post(self):
+        user_info = models.User.get_by_id(long(self.user_id))
+        prueba= models.Test(user=user_info.key, field1="prueba", field2="preuba", field3="pruba")
+        prueba.put()
+        self.redirect_to('home')
+
+    @user_required   
+    def get(self):
+        if self.user:
+            user_info = models.User.get_by_id(long(self.user_id))
+            if user_info.name or user_info.last_name:
+                self.form.name.data = user_info.name + " " + user_info.last_name
+            if user_info.email:
+                self.form.email.data = user_info.email
+        params = {
+            "exception" : self.request.get('exception')
+            }
+
+        return self.render_template('test.html', **params)
+
+    @webapp2.cached_property
+    def form(self):
+        return forms.TestForm(self)
+
+class PostEvent(BaseHandler):
+    def post(self):
+        suser= self.request.get("user")
+        stemp_id=self.request.get("temp_id")
+        stipo_evento=self.request.get("tipo_evento")
+        sfecha_evento=self.request.get("fecha_evento")
+        stitulo_evento = self.request.get("titulo_evento")
+        sdescripcion= self.request.get("descripcion")
+        smeta_evento=self.request.get("meta_evento")
+        sformato_contribucion_evento=self.request.get("formato_contribucion_evento")
+        smonto_contribucion_evento=self.request.get("monto_contribucion_evento")
+        simage_url=self.request.get("image_url")
+        logging.info('stemp_id=%s' % stemp_id)
+        saved_event=models.ItemEvent.query(models.ItemEvent.temp_id==stemp_id).get()
+        if saved_event:
+            logging.info('saved_event exists')
+            if suser!='':
+                user_info = models.User.get_by_id(long(self.user_id))
+                saved_event.user=user_info.key
+            saved_event.tipo_evento=stipo_evento
+            saved_event.fecha_evento=sfecha_evento
+            saved_event.titulo_evento=stitulo_evento
+            saved_event.descripcion=sdescripcion
+            saved_event.meta_evento=smeta_evento
+            saved_event.formato_contribucion_evento=sformato_contribucion_evento
+            saved_event.monto_contribucion_evento=smonto_contribucion_evento
+            saved_event.image_url=simage_url
+            try:
+                saved_event.put()
+            except Exception as e:
+                self.response.out.write('Error al registrar el evento') 
+        else:
+            logging.info('saved_event dont exists')
+            if suser!='':
+                user_info = models.User.get_by_id(long(self.user_id))
+                nuevoEvento=models.ItemEvent(user=user_info.key, temp_id=stemp_id, tipo_evento=stipo_evento, fecha_evento=sfecha_evento, 
+                    titulo_evento=stitulo_evento, descripcion_evento=sdescripcion, meta_evento=smeta_evento, 
+                    formato_contribucion_evento=sformato_contribucion_evento, monto_contribucion_evento=smonto_contribucion_evento,
+                    image_url=simage_url
+                    )
+            else:
+                nuevoEvento=models.ItemEvent(temp_id=stemp_id, tipo_evento=stipo_evento, fecha_evento=sfecha_evento, 
+                    titulo_evento=stitulo_evento, descripcion_evento=sdescripcion, meta_evento=smeta_evento, 
+                    formato_contribucion_evento=sformato_contribucion_evento, monto_contribucion_evento=smonto_contribucion_evento,
+                    image_url=simage_url
+                    )
+            try:
+                nuevoEvento.put()
+            except Exception as e:
+                self.response.out.write('Error al registrar el evento') 
+                return
+
+        self.response.out.write('Evento registrado con éxito.')
+
+class DeleteEvent(BaseHandler):
+    @user_required
+    def post(self):
+        sevent_id= self.request.POST.get("event_id")
+        if sevent_id!="":
+            event_to_delete=models.ItemEvent.get_by_id(long(sevent_id))
+            if event_to_delete:
+                event_to_delete.visible=False
+                event_to_delete.put()
+                self.response.out.write('true')
+            else:
+                self.response.out.write('false')
+        else:
+            self.response.out.write('false')
+
+class ParticipateHandler(RegisterBaseHandler):
+    def get(self):
+        sevent_temp_id=self.request.GET.get("temp_id")
+        #shash_event= self.request.GET.get("h")
+        #sevent_hash_check=utils.hashing(sevent_id, config.salt)
+        if sevent_temp_id and sevent_temp_id!='' :
+            event_to_show=models.ItemEvent.query(models.ItemEvent.temp_id==sevent_temp_id).get()
+            if event_to_show:
+                params={}
+                params['producto']=event_to_show
+                params['tmp_producto_id']=sevent_temp_id
+                return self.render_template('boilerplate_participate_in_event.html', **params)
+            else:
+                return self.redirect_to('home')    
+        else:
+            return self.redirect_to('home')
+
+class PaymentHandler(BaseHandler):
+    @user_required
+    def get(self):
+        sevent_temp_id=self.request.GET.get("img_tmp_id")
+        if sevent_temp_id and sevent_temp_id!='' :
+            event_to_show=models.ItemEvent.query(models.ItemEvent.temp_id==sevent_temp_id).get()
+            if event_to_show:
+                params={}
+                params['producto']=event_to_show
+                return self.render_template('boilerplate_pay_event.html', **params)
+            else:
+                return self.redirect_to('home')    
+        else:
+            return self.redirect_to('home')
+
+
+    """
+    this will exclusively recive an proccess the payment order
+    storing values to reference the payment
+    updating the event with amount and participant 
+    and saving info about a users contribution history linked to the payment
+    reference which can be used to watch for past contributions
+    """
+    @user_required
+    def post(self):
+        surl =  "http://banwire.com/api.pago_pro"
+        #surl =  "http://posttestserver.com/post.php"
+        #we have to collect the necessary info from the client
+        #upon which we will contruct the payment request to send to banwire.
+        snombre=''
+        spaterno=''
+        smaterno=''
+        stelefono=''
+        sid_tarjeta=''
+        snum_tarjeta=''
+        snum_ccv=''
+        svencimiento=''
+        scalle=''
+        snum_ext=''
+        snum_int=''
+        scodigo_postal=''
+        sciudad=''
+        smunicipio=''
+        scolonia=''
+        stipo_pago=''
+        smonto=''
+        semail=''
+
+        snombre=self.request.POST.get('nombre')
+        spaterno=self.request.POST.get('paterno')
+        smaterno=self.request.POST.get('materno')
+        stelefono=self.request.POST.get('telefono')
+        sid_tarjeta=self.request.POST.get('id_tarjeta')
+        snum_tarjeta=self.request.POST.get('numero_tarjeta')
+        snum_ccv=self.request.POST.get('numero_ccv')
+        svencimiento=self.request.POST.get('vencimiento')
+        scalle=self.request.POST.get('calle')
+        snum_ext=self.request.POST.get('num_ext')
+        snum_int=self.request.POST.get('num_int')
+        scolonia=self.request.POST.get('colonia')
+        smunicipio=self.request.POST.get('municipio') 
+        scodigo_postal=self.request.POST.get('codigo_postal')
+        sciudad=self.request.POST.get('ciudad')
+        stipo_pago=self.request.POST.get('tipo_pago')
+        simg_tmp_id=self.request.POST.get('tc_img_tmp_id')
+        smonto=self.request.POST.get('montotc')
+        semail=self.request.POST.get('emailtc')
+        snombre_completo=snombre + ' ' + spaterno + ' ' + smaterno
+        sdireccion_completa=scalle +' ' + snum_ext + ' ' + snum_int + ' ' + scolonia + ' ' + smunicipio + ' ' + sciudad
+        
+        params= {
+           'response_format': 'JSON', 
+            'user' : 'desarrollo', 
+            'reference': '12345',
+            'currency' : 'MXN',
+            'ammount' : smonto,
+            'concept' : 'Prueba de pago', 
+            'card_num'      :  snum_tarjeta, 
+            'card_name'     :  snombre_completo,
+            'card_type'     :  sid_tarjeta,
+            'card_exp'      :  svencimiento,
+            'card_ccv2'     :  snum_ccv,
+            'address'       :  sdireccion_completa,
+            'post_code'     :  scodigo_postal, 
+            'phone'         :  stelefono,
+            'mail'          :  semail
+        }
+        
+        form_data = urllib.urlencode(params)
+        """
+        result = urlfetch.fetch(url=surl,
+                                payload=form_data,
+                                method=urlfetch.POST,
+                                headers={'Content-Type': 'application/x-www-form-urlencoded'})
+        """
+        #sheaders={}
+        result = urlfetch.fetch(url=surl, payload=form_data ,method=urlfetch.POST,  allow_truncated=False, follow_redirects=True, deadline=60, validate_certificate=None)
+        #self.response.out.write(' Resultado: %s' % result.content)
+        resultado=json.loads(result.content)
+        r_user=resultado['user']
+        r_id=resultado['id']
+        r_referencia=resultado['referencia']
+        r_date=resultado['date']
+        r_card=resultado['card']
+        r_response=resultado['response']
+        r_code_auth=resultado['code_auth']
+        r_monto=resultado['monto']
+        r_client=resultado['client']
+        self.response.out.write(r_response)
+        
+
+class confirmacionOxxo(BaseHandler):
+    def get(self):
+        self.response.out.write('Hello verificacion de pago')
+
+class TestPagoOxxo(BaseHandler):
+    def get(self):
+        self.response.out.write('Hello world')
+        surl="https://www.banwire.com/api.oxxo"
+        params= {
+            'usuario' : 'desarrollo', 
+            'referencia': 'Z123X789Z',
+            'dias_vigencia' : 3,
+            'monto' : 12,
+            'url_respuesta' : 'http://wishfan.com/confirmacionPago/', 
+            'cliente'      :  'Roberto Iran Ramirez Norberto', 
+            'formato'     :  'JSON',
+            'sendPDF'     :True,
+            'email'      :  'alexsmx@gmail.com'
+        }
+        form_data = urllib.urlencode(params)
+        result = urlfetch.fetch(url=surl, payload=form_data ,method=urlfetch.POST,  allow_truncated=False, follow_redirects=True, deadline=60, validate_certificate=None)
+        self.response.out.write(' Resultado: %s' % result.content)
+        response = simplejson.loads(result.content)
+        self.response.out.write(' response: %s' % response["error"])
+        
+        if response["error"]==False:
+            barcode_img=response["response"]["barcode_img"]
+            barcode= response["response"]["barcode"]
+            referencia = response["response"]["referencia"]
+            fecha_vigencia= response["response"]["fecha_vigencia"]
+            monto=  response["response"]["monto"]
+            pagooxodb= PagoOxxo(
+                resp_cb= barcode,
+                resp_referencia= referencia,
+                resp_fecha_vigencia= fecha_vigencia,
+                resp_monto= monto,
+                resp_bc_img=base64.b64decode(barcode_img)
+                )
+            pagooxodb.put()
+        
+class imagenOxxo(BaseHandler):
+    def get(self):
+        id=self.request.GET.get("id")
+        logging.info("Id: %s" % id)
+        imagen= PagoOxxo.get_by_id(int(id))
+        self.response.headers['Content-Type'] = 'image/png'
+        self.response.out.write(imagen.resp_bc_img)

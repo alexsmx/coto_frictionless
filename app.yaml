@@ -56,6 +56,11 @@ handlers:
   static_files: boilerplate/static/img/\1
   upload: boilerplate/static/img/(.*\.(gif|png|jpg))
 
+- url: /(.*\.(html))
+  static_files: /static/\1
+  upload: static/(.*\.(html))
+  expiration: 30d
+
 - url: /css
   mime_type: text/css
   static_dir: static/css

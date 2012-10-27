@@ -68,6 +68,12 @@ class ContactForm(BaseForm):
     message = fields.TextAreaField(_('Message'), [validators.Required(), validators.Length(max=65536)])
 
 
+class TestForm(BaseForm):
+    email = fields.TextField(_('Email'), [validators.Required(), validators.Length(min=7, max=FIELD_MAXLENGTH), validators.regexp(utils.EMAIL_REGEXP, message=_('Invalid email address.'))])
+    name = fields.TextField(_('Name'), [validators.Required(), validators.Length(max=FIELD_MAXLENGTH)])
+    message = fields.TextAreaField(_('Message'), [validators.Required(), validators.Length(max=65536)])
+
+
 class RegisterForm(PasswordMixin, ConfirmPasswordMixin, UserMixin):
     email = fields.TextField(_('Email'), [validators.Required(), validators.Length(min=7, max=FIELD_MAXLENGTH), validators.regexp(utils.EMAIL_REGEXP, message=_('Invalid email address.'))])
     pass

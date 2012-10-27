@@ -1,0 +1,193 @@
+{% extends base_layout %}
+
+{% block title %}
+        {% trans %}Evento{% endtrans %} - {{app_name}}
+{% endblock %}
+{% block header_title %}
+        {% trans %}Evento{% endtrans %}
+{% endblock %}
+
+{% block content %}
+<div class="well">
+<h1>Escoge el método de contribución que más te convenga.</h1>
+    <div id="tabs" style="display:none">
+        <ul>
+            <li><a href="#tabs-1">Tarjeta de Crédito <i class="icon-question-sign"></i></a></li>
+            <li><a href="#tabs-2">OXXO <i class="icon-question-sign"></i></a></li>
+            <li><a href="#tabs-3">Datos del Evento</a></li>
+        </ul>
+        <div id="tabs-1">
+            <div class="row">
+                <form id="datos_pago_tc" name="datos_pago_tc" method="POST" action="/pagar/">
+                    <div class="span7">
+                        <table>
+                            <tr><td>Nombre</td><td>Apellido Paterno</td><td>Apellido Materno</td></tr>
+                            <tr><td><input id="nombre" name="nombre" value="Roberto I"></input></td><td> <input id="paterno" name="paterno" value="Ramirez"></input></td><td> <input id="materno" name="materno" value="N"></input></td></tr>
+                            <tr><td>Teléfono</td><td>Correo electrónico (para aclaraciones)</td></tr>
+                            <tr><td><input id="telefono" name="telefono" value="15799155"></input></td><td><input id="emailtc" name="emailtc" value="jruiz@banwire.com"></td></tr>
+                            <tr><td>Tarjeta</td></tr>
+                            <tr><td>
+                                <select id="id_tarjeta" name="id_tarjeta">
+                                    <option selected="true" value="visa">Visa</option>
+                                    <option value="mastercard">MasterCard</option>
+                                    <option value="amex">American Express</option>
+                                </select>
+                            </td></tr>
+                            <tr><td>Número de Tarjeta</td><td>Código de Seguridad</td><td>Fecha de Vencimiento</td></tr>
+                            <tr><td><input id="numero_tarjeta" name="numero_tarjeta" value="5204164299999999"></input></td><td><input id="numero_ccv" name="numero_ccv" value="999"></input></td><td><input id="vencimiento" name="vencimiento" value="11/12"></input></td></tr>
+                            <tr><td>Calle</td><td>Número Exterior</td><td>Número Interior</td></tr>
+                            <tr><td><input id="calle" name="calle" value="Horacio"></input></td><td> <input id="num__ext" name="num_ext" value=""></input></td><td><input id="num_int" name="num_int" value=""></input> </td></tr>
+                            <tr><td>Código Postal</td></tr>
+                            <tr><td><input id="codigo_postal" name="codigo_postal" value="11560"></input></td></tr>
+                            <tr><td>Ciudad</td><td>Municipio</td><td>Colonia</td></tr>
+                            <tr><td><input id="ciudad" name="ciudad" value=""></input></td><td><input id="municipio" name="municipio" value=""></input></td><td><input id="colonia" name="colonia" value=""></input>
+                            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                            <input type="hidden" name="tipo_pago" value="TC"/>
+                            <input type="hidden" name="tc_img_tmp_id" value="{{ producto.tmp_id }}">
+                            </td></tr>
+                        </table>
+                    </div>
+                    <div class="span4 ">
+                        <div class="well">
+                            <h1>Monto a Contribuir</h1>
+                            {% if producto.formato_contribucion_evento =='option1' %}
+                            <h2>$ {{ producto.monto_contribucion_evento }}</h2>
+                            <input type="hidden" id="montotc" name="montotc" value="{{ producto.monto_contribucion_evento }}">
+                            {% else %}
+                            <input type="text" id="montotc" name="montotc" value="">
+                            {% endif %}
+                            <div onclick="sendPaymentTC();return false;" class="btn btn-success"><h3>Concluir Pago</h3></div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div id="tabs-2">
+            <div class="row">
+             <div class="span4 ">
+                    <div class="well">
+                        <h1>Monto a Contribuir</h1>
+                        {% if producto.formato_contribucion_evento =='option1' %}
+                        <h2>$ {{ producto.monto_contribucion_evento }}</h2>
+                        {% else %}
+                        <input id="monto" name="monto" value="">
+                        {% endif %}
+                        <table><tr><td>Correo electrónico</td><td><input id="emailoxxo" name="emailoxxo" value=""></td></table>
+                        
+                        <div  class="btn btn-success"><h3>Generar formato de pago.</h3></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="tabs-3">
+            <table class="table table-hover">
+                <thead>
+                    <tr><th>Foto</th><th>Evento</th><th>Recaudado</th></tr>
+                </thead>
+                <tbody>
+                    
+                    <tr><td>
+                    <img src="{{ producto.image_url }}" />
+                </td>
+                <td>
+                    <table>
+                        <tr>
+                            <td><h3>{{ producto.titulo_evento }}</h3>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><i>{{ producto.descripcion_evento }}</i>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                {% if producto.tipo_evento== '1' %}
+                                    Cumpleaños 
+                                {% elif producto.tipo_evento=='2' %}
+                                    Mesa de Regalos
+                                {% elif producto.tipo_evento=='3' %}
+                                    Evento
+                                {% else %}
+                                    Otro
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                {% if producto.fecha_evento|length >0 %}
+                                    {{ producto.fecha_evento }}
+                                {% else %}
+                                    No tiene fecha asignada.
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td><div class="progress progress-danger progress-striped active">
+                    <div class="bar" style="width: 100%;">0%</div>
+                    </div></td><td></td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+<div class="modal hide" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3 id="myModalLabel">Procesando Pago</h3>
+  </div>
+  <div class="modal-body">
+    <div id="procesando_pago">
+        <p>Se está enviando la información sobre su pago</p>
+        <div class="progress progress-striped active">
+            <div class="bar" style="width: 100%;"></div>
+        </div>
+    </div>
+    <div id="pago_exitoso" style="display:none">
+        <p>Su pago se aplicó con éxito</p>
+        <button class="btn btn-primary" data-dismiss="modal" aria-hidden="true">Continuar</button>
+    </div>
+    <div id="procesando_fallido" style="display:none">
+        <p>No se pudo procesar su pago, intente nuevamente o use otro medio.</p>
+        <button class="btn btn-primary" data-dismiss="modal" aria-hidden="true">Continuar</button>
+    </div>
+  </div>
+  <div class="modal-footer">
+  </div>
+</div>
+{% endblock %}
+
+{% block mediaJS %}
+<script>
+$(function() {
+        $('#datos_pago_tc').ajaxForm();
+        $( "#tabs" ).tabs();
+        $( "#tabs" ).show();
+    });
+
+function sendPaymentTC(){
+    $('#procesando_pago').show();
+    $('#pago_exitoso').hide();
+    $('#procesando_fallido').hide();
+    $('#myModal').modal('show');
+
+    var options={
+        success: function(responseText, statusText, xhr, jqwForm){
+          //alert(responseText);
+          $('#pago_exitoso').show();
+          $('#procesando_pago').hide();
+          $('#procesando_fallido').hide();
+        },
+        error:function(){
+            $('#pago_exitoso').hide();
+            $('#procesando_pago').hide();
+            $('#procesando_fallido').show();
+            //alert('Error enviando pago');
+        }
+    };
+    $('#datos_pago_tc').ajaxSubmit(options);
+}
+</script>
+{% endblock %}
+

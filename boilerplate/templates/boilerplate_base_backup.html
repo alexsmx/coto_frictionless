@@ -1,5 +1,5 @@
 {% import "macros.html" as macros %}
-<!DOCTYPE html xmlns:og="http://ogp.me/ns" xmlns:fb="http://www.facebook.com/2008/fbml" lang="en">
+<!DOCTYPE html>
 <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang="{{ locale_language_id }}"> <![endif]-->
 <!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8" lang="{{ locale_language_id }}"> <![endif]-->
 <!--[if IE 8]>         <html class="no-js lt-ie9" lang="{{ locale_language_id }}"> <![endif]-->
@@ -8,9 +8,9 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <title>{% block title %}{{ app_name }}{% endblock %}</title>
-    <meta name="description" content="WishFan, Crowdfunding de regalos y eventos">
-    <meta name="author" content="somapps">
-    <meta name="keywords" content="regalos crowdfunding eventos">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keywords" content="">
     <meta name="generator" content="Google App Engine Boilerplate 2.2.0-beta rev464 (g65d4c69)">
 
     <!-- Mobile viewport optimized: h5bp.com/viewport -->
@@ -21,8 +21,6 @@
     {% endif %}
     <link rel="stylesheet" href="/boilerplate/css/boilerplate.min.css">
     <link rel="stylesheet" href="/css/style.css">
-     <link rel="stylesheet" href="/css/fullcalendar.css">
-    <link rel="stylesheet" href="http://ajax.aspnetcdn.com/ajax/jquery.ui/1.8.23/themes/ui-lightness/jquery-ui.css">
     {% block mediaCSS %}{% endblock %}
     <script type="text/javascript">
         var _gaq = _gaq || [];
@@ -43,7 +41,6 @@
     <script src="/boilerplate/js/libs/modernizr-2.6.1.min.js"></script>
 </head>
 <body>
-    <div id="fb-root"></div>
     <!-- Prompt IE 6 users to install Chrome Frame. Remove this if you support IE 6.
            chromium.org/developers/how-tos/chrome-frame-getting-started -->
     <!--[if lt IE 8]>
@@ -63,6 +60,7 @@
                 <a class="brand" href="/">{{ app_name }}</a>
                 <div class="nav-collapse">
                     <ul class="nav pull-right">
+                        <li><a href="https://github.com/coto/gae-boilerplate" target="_blank"><span class="icon-inbox" ></span> {% trans %}Source Code{% endtrans %}</a></li>
                         {% if locale_iso %}
                         <li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
@@ -78,7 +76,7 @@
                         {% if user_id %}
                         <li class="divider-vertical"></li>
                         <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{ nombre }} <b class="caret"></b></a>
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">@{{ username }} <b class="caret"></b></a>
                             <ul class="dropdown-menu">
                                 <li><a href="{{ uri_for("edit-profile") }}">{% trans %}Edit Profile{% endtrans %}</a></li>
                                 <li class="divider"></li>
@@ -92,8 +90,6 @@
                             <div class="dropdown-menu well">
                                 <form id="form_login_user" action="{{ uri_for("login") }}" method="post" class="auth-at-dropdown">
                                     <fieldset>
-                                        {{ macros.federated_login(provider_info, provider_uris, enable_federated_login) }}
-                                        <h4>O tu usuario registrado:</h4>
                                         <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                                         <div class="control-group">
                                             <label class="control-label" for="l_username">{% trans %}Username or Email{% endtrans %}:</label>
@@ -119,6 +115,7 @@
                                         <div class="control-group">
                                             <a href="{{ uri_for("password-reset") }}">{% trans %}Forgot your password?{% endtrans %}</a>
                                         </div>
+                                        {{ macros.federated_login(provider_info, provider_uris, enable_federated_login) }}
                                     </fieldset>
                                 </form>
                             </div>
@@ -134,8 +131,24 @@
             {% block header %}
             <header class="navbar" id="overview">
                 {% block header_title_lead %}
-                    <h1>{% block header_title %}{{ app_name }}{% endblock %}</h1>
+                <h1>{% block header_title %}{{ app_name }}{% endblock %}</h1>
+                <p class="lead">
+		            {% trans %}Congratulations on your Google App Engine Boilerplate powered page.{% endtrans %}
+		            <br><a href="http://github.com/coto/gae-boilerplate/blob/master/README.rdoc" target="_blank">
+		            {% trans %}Learn why this Boilerplate Rocks{% endtrans %}</a> {% trans %}or just{% endtrans %} 
+		            <a href="http://github.com/coto/gae-boilerplate/" target="_blank">{% trans %}download the Source Code{% endtrans %}</a> 
+		            {% trans %}to help you to create your application.{% endtrans %}
+				</p>
                 {% endblock %}
+                <div class="subnav">
+                    <ul>
+                        <li{% if path == uri_for("contact") %} class="active"{% endif %}><a href="{{ uri_for("contact") }}">{% trans %}Contact{% endtrans %}</a></li>
+                        {% if not user_id %}
+                        <li{% if path == uri_for("register") %} class="active"{% endif %}><a href="{{ uri_for("register") }}">{% trans %}Sign Up{% endtrans %}</a></li>
+                        <li{% if path == uri_for("password-reset") %} class="active"{% endif %}><a href="{{ uri_for("password-reset") }}">{% trans %}Forgot your password?{% endtrans %}</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
             </header>
             {% endblock %}
 
@@ -147,61 +160,28 @@
             </p>
             {% endfor %}
         {% endif %}
-            {% block content %}
-            {% endblock %}
+            {% block content %}{% endblock %}
 
             {% block footer %}
-            
+            <footer>
+                {% trans %}Google App Engine Boilerplate is released under the{% endtrans %} <a href="http://www.gnu.org/licenses/gpl-3.0.html" target="_blank">LGPL</a>
+            </footer>
             {% endblock %}
         </div><!-- /content -->
     </div><!-- /page -->
 
     <!-- JavaScript at the bottom for fast page loading -->
     <!-- Grab Google CDN's jQuery, with a protocol relative URL; fall back to local if offline -->
-    <script>
-    //Facebook loading script
-      window.fbAsyncInit = function() {
-        // init the FB JS SDK
-        FB.init({
-          appId      : '{{ fb_appid}}', // App ID from the App Dashboard
-          channelUrl : '{{ fb_channel }}channel.html', // Channel File for x-domain communication
-          status     : true, // check the login status upon init?
-          cookie     : true, // set sessions cookies to allow your server to access the session?
-          xfbml      : true,  // parse XFBML tags on this page?
-          frictionlessRequests: true,
-          useCachedDialogs: true,
-          oauth: true
-        });
-
-        // Additional initialization code such as adding Event Listeners goes here
-
-      };
-
-      // Load the SDK's source Asynchronously
-      (function(d){
-         var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
-         if (d.getElementById(id)) {return;}
-         js = d.createElement('script'); js.id = id; js.async = true;
-         js.src = "//connect.facebook.net/en_US/all.js";
-         ref.parentNode.insertBefore(js, ref);
-       }(document));
-    </script>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-    <script>window.jQuery || document.write('<script src="/js/libs/jquery-1.8.0.min.js"><\/script>')</script>
-    <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.23/jquery-ui.min.js"></script>
+    <script>window.jQuery || document.write('<script src="/boilerplate/js/libs/jquery.min.js"><\/script>')</script>
     <script src="/boilerplate/js/libs/bootstrap.min.js"></script>
-    <script src="/js/libs/jquery.masonry.min.js"></script>
-    <script src="/js/libs/jquery.form.js"></script>
-    <script src="/js/libs/fullcalendar.js"></script>
-    <script src="/js/libs/jquery.balloon.js"></script>
-    <script src="/js/libs/jquery.ui.datepicker-es.js"></script>
+
     <!-- scripts concatenated and minified via build script -->
     <script src="/boilerplate/js/plugins.js"></script>
     <script src="/boilerplate/js/script.js"></script>
     <script src="/js/script.js"></script>
     {% if locale_language_id != "en" %}
     <script src="/boilerplate/js/libs/jquery_validation/localization/messages_{{ locale_language_id }}.js"></script>
-    
     {% endif %}
     {% block mediaJS %}{% endblock %}
     <!-- end scripts -->

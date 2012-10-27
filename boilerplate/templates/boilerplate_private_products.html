@@ -1,0 +1,228 @@
+{% extends base_layout %}
+
+{% block header_title_lead %}{% endblock %}
+
+{% block content %}
+
+<div class="well">
+<div class="tabbable"> <!-- Only required for left/right tabs -->
+  <ul class="nav nav-tabs">
+    <li class="active"><a href="#tab1" data-toggle="tab">Mis Eventos</a></li>
+    <li><a href="#tab2" data-toggle="tab" onclick="setupCalendar();">Calendario</a></li>
+    <li><a href="#tab3" data-toggle="tab">Mis Amigos</a></li>
+    <li><a href="#tab4" data-toggle="tab">Configuración</a></li>
+  </ul>
+  <div class="tab-content" >
+    <div class="tab-pane active" id="tab1" style="height:100%;">
+        <div class="page-header">
+            <h1>Mis Eventos <small>Tus cumpleaños, mesas de regalo y reuniones.</small></h1>
+        </div>
+        <div class="btn-group">
+                <button class="btn btn-info dropdown-toggle" data-toggle="dropdown">Agregar nuevo evento <span class="caret"></span></button>
+                <ul class="dropdown-menu">
+                  <li><a href="{{ uri_for("first-product") }}?tipo=1">Cumpleaños</a></li>
+                  <li><a href="{{ uri_for("first-product") }}?tipo=2">Mesa de Regalos </a></li>
+                  <li><a href="{{ uri_for("first-product") }}?tipo=3">Reunión</a></li>
+                </ul>
+              </div>
+
+        <table class="table table-hover">
+            <thead>
+                <tr><th>Nombre</th><th>Tipo de Evento</th><th>Fecha</th><th>Regalo</th><th>Recaudado</th><th>Administrar</th><th>Transferir</th></tr>
+            </thead>
+            <tbody>
+                {% for producto in productos %}
+                    {% if producto.visible is defined and producto.visible==True %}
+                        <tr id="evt{{ producto.getstrkey() }}"><td>{{ producto.titulo_evento }}<br/><i> {{ producto.descripcion_evento }}</i></td><td>
+                            {% if producto.tipo_evento== '1' %}
+                                Cumpleaños {{ producto.visible }}
+                            {% elif producto.tipo_evento=='2' %}
+                                Mesa de Regalos
+                            {% elif producto.tipo_evento=='3' %}
+                                Evento
+                            {% else %}
+                                Otro
+                            {% endif %}
+                        </td><td>
+                        {% if producto.fecha_evento|length >0 %}
+                            {{ producto.fecha_evento }}
+                        {% else %}
+                            No tiene fecha asignada.
+                        {% endif %}
+                        </td><td>
+                            <img src='{{ producto.image_url }}' width="50px" height="50px"/>
+                        </td><td><div class="progress progress-danger progress-striped active">
+                            <div class="bar" style="width: 100%;">0%</div>
+                            </div></td><td>
+                                <a href="#" title="Configurar">
+                                    <i class="icon-tasks"></i>
+                                </a>
+                                <a href="#" onclick="eliminarItem( {{ producto.getstrkey() }} ); return false; "title="Eliminar" >
+                                    <icon class="icon-trash"></i>
+                                </a>
+                                <a href="#" onclick="publishOnFb({{ producto.getstrkey() }},'{{ producto.gethashkey() }}'; return false; )" title="Publicar en Facebook">
+                                    <i class="icon-share"></i>
+                                </a>
+                                
+                                <a href="http:{{ fb_channel }}participateInEvent/?temp_id={{ producto.temp_id }}" target="_blank" title="Ver página de aportaciones.">
+                                    <i class="icon-eye-open"></i>
+                                </a>
+                        </td><td><button class="btn disabled">Transferir <i class="icon-question-sign"></i></button></td></tr>
+                    {% endif%}
+                {% endfor%}
+              
+            </tbody>
+        </table>
+        <div class="page-header">
+            <h1>Eventos de Mis Contactos <small>¿Qué está pasando en los próximos días?</small></h1>
+        </div>
+        <table class="table table-hover">
+            <thead>
+                <tr><th>#</th><th>Nombre</th><th>Tipo de Evento</th><th>Fecha</th><th>Regalo</th><th>Recaudado</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>1</td><td>Carlos Pérez</td><td>Cumpleaños</td><td>14 de octubre</td><td><div class="btn btn-warning">Recomiéndale <i class="icon-question-sign"></i></div></td><td><div class="progress progress-danger progress-striped active">
+                <div class="bar" style="width: 100%;">0%</div>
+                </div></td></tr>
+                <tr><td>2</td><td>Verónica Hernandez</td><td>Mesa de Regalos</td><td>20 de noviembre</td><td><div class="btn btn-success">Contribuir <i class="icon-question-sign"></i></div></td><td><div class="progress progress-success progress-striped active">
+                <div class="bar" style="width: 90%;">90%</div>
+                </div></td></tr>
+            </tbody>
+        </table>
+        
+    </div>
+    <div class="tab-pane " id="tab2" style="height:100%">
+      <div id="calendar"></div>
+    </div>
+    <div class="tab-pane " id="tab3" style="height:100%">
+        <div class="page-header">
+            <h1>Amigos que ya están en WishFan <small></small></h1>
+        </div>
+        <fb:facepile app_id="{{ fb_appid }}" width="300" max_rows="10" size="large"></fb:facepile>
+
+        <div class="page-header">
+            <h1>Invita a tus amigos a usar la lista de regalos! <small></small></h1>
+            <p/>
+            <div class="btn btn-success" onclick="enviarInvitacion();"> Envíales un mensaje para que se inscriban</div>
+        </div>
+    </div>
+    <div class="tab-pane " id="tab4" style="height:100%">
+      <p>Configuración</p>
+    </div>
+  </div>
+</div>
+</div>
+    {% if user_id %}
+
+    {% else %}
+   
+    {% endif %}
+<div class="modal hide" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3 id="myModalLabel">Eliminar Evento</h3>
+  </div>
+  <div class="modal-body">
+    <p>¿Está seguro de que desea eliminar el evento?</p>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-primary" data-dismiss="modal" aria-hidden="true">No borrar!</button>
+    <button class="btn btn-warning" onclick="eliminarItemConfirmado();return false; ">Si, estoy seguro: Eliminar Evento</button>
+  </div>
+</div>
+<form id="frmeliminarItem" name="frmeliminarItem" method="POST" action="/deleteEvent/">
+    <input type="hidden" id="event_id" name="event_id" value=""/>
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+</form>
+{% endblock %}
+
+
+{% block mediaJS %}
+    <script>
+        var id_item_a_eliminar;
+
+        function eliminarItem(id){
+            id_item_a_eliminar=id;
+            $('#myModal').modal('show');
+
+        }
+        
+        function eliminarItemConfirmado(){
+            $('#event_id').val(id_item_a_eliminar);
+            options={
+                success:function(responseText, statusText, xhr, jqwForm){
+                    strevento='#evt' + id_item_a_eliminar;
+                    $(strevento).remove();
+                    //alert('Evento eliminado.*')
+
+                },
+                error:function(){
+                    alert('Error borrando datos del evento')
+                }
+            };
+            $('#frmeliminarItem').ajaxSubmit(options);
+            $('#myModal').modal('hide');
+        }
+        function enviarInvitacion(){
+             FB.ui({method: 'apprequests',
+                message: 'Me inscribí a WishFan para hacer CrowdFunding de nuestros regalos y eventos.',
+                filter:['app_non_users'],
+                title:'Inscríbte a WishFan!'
+              }, requestCallback);
+        }
+
+        function requestCallback(response) {
+        // Handle callback here
+            //alert(response);
+        }
+    </script>
+    <script>
+        var calendario = false;
+        function setupCalendar(){
+            if (!calendario ){
+                $('#calendar').fullCalendar({
+                    // put your options and callbacks here
+                });
+                $('#calendar').fullCalendar('today');
+                calendario=true;
+            }
+            var id = setTimeout(function(){
+                $('#calendar').fullCalendar('render');
+            }, 1);
+            
+        }
+    </script>
+    <script type="text/javascript">
+        $().ready(function() {
+            $('#frmeliminarItem').ajaxForm();
+
+            $("#form_login_user").validate({
+                submitHandler: function(form) {
+                    form.submit();
+                },
+                errorPlacement: function(error, element) {
+                    element.parent().parent().addClass("error");
+                    error.addClass("help-inline").appendTo( element.parent() );
+                }
+            });
+
+            $("#form_register").validate({
+                submitHandler: function(form) {
+                    form.submit();
+                },
+                rules: {
+                    password: 'required',
+                    c_password: {
+                        required: true,
+                        equalTo: '#password'
+                    }
+                },
+                errorPlacement: function(error, element) {
+                    element.parent().parent().addClass("error");
+                    error.addClass("help-inline").appendTo( element.parent() );
+                }
+            });
+        });
+    </script>
+{% endblock %}
+

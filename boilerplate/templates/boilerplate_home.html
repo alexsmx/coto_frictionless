@@ -5,37 +5,30 @@
 {% block content %}
 
     {% if user_id %}
-    <div class="hero-unit home_bp">
-        <h1>
-            Google App Engine Boilerplate
-        </h1>
-        <p>
-            {% trans %}Congratulations on your Google App Engine Boilerplate powered page.{% endtrans %}
-            <br><a href="http://github.com/coto/gae-boilerplate/blob/master/README.md" target="_blank">
-            {% trans %}Learn why this Boilerplate Rocks{% endtrans %}</a> {% trans %}or just{% endtrans %} 
-            <a href="http://github.com/coto/gae-boilerplate/" target="_blank">{% trans %}download the Source Code{% endtrans %}</a> 
-            {% trans %}to help you to create your application.{% endtrans %}
-        </p>
-    </div>
+    
     {% else %}
     <div class="row">
         <div class="span9">
-            <div class="home_bp">
-                <h1>
-                    Google App Engine Boilerplate
-                </h1>
-                <p>
-                    {% trans %}Congratulations on your Google App Engine Boilerplate powered page.{% endtrans %}
-                    <br><a href="http://github.com/coto/gae-boilerplate/blob/master/README.rdoc" target="_blank">
-                    {% trans %}Learn why this Boilerplate Rocks{% endtrans %}</a> {% trans %}or just{% endtrans %} 
-                    <a href="http://github.com/coto/gae-boilerplate/" target="_blank">{% trans %}download the Source Code{% endtrans %}</a> 
-                    {% trans %}to help you to create your application.{% endtrans %}
-                </p>
+            <div class="hero-unit btn-primary">
+                        <p><i class="icon-gift"></i> Elige tu regalo.</p>
+                        <p></p>
+                        <p><i class="icon-gift"></i> Pon fecha límite y monto a conseguir.</p>
+                        <p></p>
+                        <p><i class="icon-gift"></i> ¡Consigue tu meta con la ayuda de tus amigos!</p>
+                        <p></p>
+                        <p></p>
+                        <br/>
+                        <div onclick="window.location.href={{ uri_for("first-product") }}" class="btn btn-danger" >
+                            <h2>Pide tu regalo!</h2>
+                        </div>
+                    </ul>
             </div>
         </div>
         <div class="span3 auth-at-home">
             <form id="form_login_user" action="{{ uri_for("login") }}" method="post">
                 <fieldset class="well">
+                    {{ macros.federated_login(provider_info, provider_uris, enable_federated_login) }}
+                    <h4>O tu usuario registrado:</h4>
                     <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                     <div class="control-group">
                         <label class="controls">
@@ -59,37 +52,8 @@
                             <a href="{{ uri_for("password-reset") }}">{% trans %}Forgot your password?{% endtrans %}</a>
                         </label>
                     </div>
-                    {{ macros.federated_login(provider_info, provider_uris, enable_federated_login) }}
-                </fieldset>
-            </form>
-
-            <h3>{% trans %}Sign Up{% endtrans %}</h3>
-            <form id="form_register" action="{{ uri_for("register") }}" method="post">
-                <fieldset class="well">
-                    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
-                    <div class="control-group">
-                        <label class="controls">
-                            <input class="focused required" name="username" id="username" type="text" placeholder="{% trans %}Username{% endtrans %}">
-                        </label>
-                    </div>
-                    <div class="control-group">
-                        <label class="controls">
-                            <input class="focused required email" name="email" id="email" type="email" placeholder="{% trans %}Email{% endtrans %}">
-                            <input type="hidden" name="country" value="">
-                        </label>
-                    </div>
-                    <div class="control-group">
-                        <label class="controls">
-                            <input class="focused required" name="password" id="password" type="password" placeholder="{% trans %}Password{% endtrans %}">
-                        </label>
-                    </div>
-                    <div class="control-group">
-                        <label class="controls">
-                            <input class="focused required" name="c_password" id="c_password" type="password" placeholder="{% trans %}Confirm Password{% endtrans %}">
-                        </label>
-                    </div>
-                    <div class="control-group">
-                        <button type="submit" class="btn btn-primary">{% trans %}Sign Up{% endtrans %}</button>
+                    <div>
+                        ¿No te has registrado y no quieres usar Facebook? <a href="{{ uri_for("register") }}">Regístrate!</a>
                     </div>
                 </fieldset>
             </form>

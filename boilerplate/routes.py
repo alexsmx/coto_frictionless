@@ -26,7 +26,17 @@ _routes = [
     RedirectRoute('/password-reset/', handlers.PasswordResetHandler, name='password-reset', strict_slash=True),
     RedirectRoute('/password-reset/<user_id>/<token>', handlers.PasswordResetCompleteHandler, name='password-reset-check', strict_slash=True),
     RedirectRoute('/change-email/<user_id>/<encoded_email>/<token>', handlers.EmailChangedCompleteHandler, name='email-changed-check', strict_slash=True),
-    RedirectRoute('/', handlers.HomeRequestHandler, name='home', strict_slash=True)
+    RedirectRoute('/testNDBModel/', handlers.testNDBModelRequestHandler, name='testndbmodel', strict_slash=True),
+    RedirectRoute('/', handlers.HomeRequestHandler, name='home', strict_slash=True),
+    RedirectRoute('/first_product/', handlers.FirstProductHandler, name='first-product', strict_slash=True),
+    RedirectRoute('/upload/', handlers.UploadHandler, name='upload', strict_slash=False),
+    RedirectRoute('/uploadUrl/', handlers.getUploadURLHandler, name='uploadurl', strict_slash=True),
+    RedirectRoute('/getGUID/', handlers.getGuid, name='getguid', strict_slash=True),
+    RedirectRoute('/postEvent/', handlers.PostEvent, name='post_event', strict_slash=True),
+    RedirectRoute('/deleteEvent/', handlers.DeleteEvent, name='delete_event', strict_slash=True),
+    RedirectRoute('/participateInEvent/', handlers.ParticipateHandler, name='participate_in_event', strict_slash=True),
+    RedirectRoute('/pagar/', handlers.PaymentHandler, name='pay_for_event', strict_slash=True)
+
 ]
 
 def get_routes():

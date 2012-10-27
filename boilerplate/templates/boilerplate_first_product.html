@@ -1,0 +1,658 @@
+{% extends base_layout %}
+
+{% block header_title_lead %}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- <div class="span6"><h1>Mi lista de Regalos!</h1></div><div class="span6 "><div class="btn btn-success">Buscar más regalos!</div></div> -->
+</div>
+<div id="paso1" {% if isrevisit==1 %} style="display:none" {% endif %}  >
+    <div class="well form-search">
+        <h1>Paso 1: </h1>
+        <h2>Busca y elige una foto que ilustre tu regalo o evento. (e.j. Ipad 64 GB)</h2>
+        <br/>
+        <input onkeypress="enterPressed(event);" id="strbusqueda" type="text" class="input-medium search-query">
+        <div onclick="load_images($('#strbusqueda').val());" class="btn btn-info">Search</div>
+        <br/>
+        <h2>O bien, sube una foto desde tu computadora.</h2>
+        <br/>
+        <form id="image_upload" action="{{ upload_url }}" method="POST" enctype="multipart/form-data">
+            <input type="file" name="file"/>
+            <div onclick="enviar_foto(); return false; " class="btn btn-info">Cargar imágen</div>    
+        </form>
+    </div>
+     <div id="pagination_div" class="pagination pagination-centered" name="pagination_div" ></div>
+    <ul id="fotos1" name="fotos1" class="thumbnails">
+
+    </ul>​
+</div>
+<div id="paso2" {% if paso!='4' %} style="display:none" {% endif %}>
+    <div class="well form-vertical">
+        <h1>Paso {% if paso=='4' %} 4 {% else %} 2 {% endif %}: </h1><h2>
+        {% if paso=='4' %} Listo! Publícalo en Facebook!
+        {% else %} 
+            Establece fecha y meta del evento
+        {% endif %}
+        
+        </h2>
+        <br/>
+        <div class="row">
+            <div class="span4">
+                <ul class="thumbnails">
+                  <li class="span3">
+                    <a href="#" class="thumbnail">
+                      <img id="foto_seleccionada" 
+                      {% if isrevisit==1 %}
+                         src="{{ saved_item.image_url}}"
+                      {% else %}
+                        src="http://placehold.it/260x180" 
+                      {% endif %}
+                      alt="">
+                    </a>
+                  </li>
+                </ul>
+            </div>
+            <div class="span6">
+                <div class="form-horizontal"><fieldset>
+                    <div class="control-group">
+                        <label class="control-label" for="selectError">Tipo de evento:</label>
+                        <div class="controls">
+                          <select id="selectError">
+                            {% if isrevisit==1 %}
+                                <option {% if saved_item.tipo_evento=='1' %} selected='True' {% endif %} value='1'>Cumpleaños</option>
+                                <option {% if saved_item.tipo_evento=='2' %} selected='True' {% endif %} value='2'>Mesa de Regalos</option>
+                                <option {% if saved_item.tipo_evento=='3' %} selected='True' {% endif %} value='3'>Evento</option>
+                            {% else %}
+                                <option {% if tipo=='1' %} selected='True' {% endif %} value='1'>Cumpleaños</option>
+                                <option {% if tipo=='2' %} selected='True' {% endif %} value='2'>Mesa de Regalos</option>
+                                <option {% if tipo=='3' %} selected='True' {% endif %} value='3'>Evento</option>
+                            {% endif %}
+                            
+                          </select>
+                          <span class="help-inline"></span>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label" for="inputWarning">Fecha del evento:</label>
+                        <div class="controls">
+                            <input type="text" id="datepicker" name="datepicker"
+                                {% if isrevisit==1 %}
+                                    value="{{ saved_item.fecha_evento}}"
+                                {% else %}
+                                    value="" 
+                                {% endif %}
+                            ><div id="errorfecha" class="alert"
+                            name="errorfecha" style="display:none;" >Debes poner fecha a tu evento.</div>
+                        </div>
+
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label" for="inputWarning">Título: </label>
+                            <div class="controls">
+                            <input type="text" id="titulo"
+                                {% if isrevisit==1 %}
+                                    value="{{ saved_item.titulo_evento}}"
+                                {% else %}
+                                    value="" 
+                                {% endif %}
+                            ><div id="errortitulo" class="alert"
+                            name="errortitulo" style="display:none;" >Debes elegir un título para el evento.</div>
+                        </div>
+                    </div>
+
+
+                    <div class="control-group">
+                        <label class="control-label" for="inputWarning">Descripción: </label>
+                            <div class="controls">
+                            <input type="text" id="subtitulo"
+                                {% if isrevisit==1 %}
+                                    value="{{ saved_item.descripcion_evento}}"
+                                {% else %}
+                                    value="" 
+                                {% endif %}
+                            >
+                            <div id="errorsubtitulo" class="alert"
+                            name="errorsubtitulo" style="display:none;" >Debes elegir un subtítulo para tu evento.</div>
+                        </div>
+                    </div>
+
+
+                    <div class="control-group">
+                        <label class="control-label" for="inputWarning">Meta a conseguir ($):</label>
+                            <div class="controls">
+                            <input type="text" id="meta"
+                                {% if isrevisit==1 %}
+                                    value="{{ saved_item.meta_evento}}"
+                                {% else %}
+                                    value="" 
+                                {% endif %}
+                            >
+                            <div id="errormeta" class="alert"
+                            name="errormeta" style="display:none;" >Debes establecer una meta de recaudación para tu evento.</div>
+                        </div>
+                    </div>
+
+                  
+                    <div class="control-group">
+                        <label class="control-label">Formato de contribución:</label>
+                        <div class="controls">
+                        <label class="radio">
+                        <input type="radio" name="optionsRadios" id="optionsRadios" value="option1"
+                            {% if isrevisit==1 and saved_item.formato_contribucion_evento=='option1' %}
+                                checked="true"
+                            {% else %}
+                                
+                            {% endif %}
+                         >
+                        Monto fijo de: <input id="montofijo" name="montofijo" type="text"
+                            {% if isrevisit==1 and saved_item.formato_contribucion_evento=='option1' %}
+                                value={{ saved_item.monto_contribucion_evento }}
+                            {% else %}
+                                
+                            {% endif %}
+                         >
+                        </label>
+                        <label class="radio">
+                        <input type="radio" name="optionsRadios" id="optionsRadios" value="option2"
+                            {% if isrevisit==1 and saved_item.formato_contribucion_evento=='option2' %}
+                                checked="true"
+                            {% else %}
+                                
+                            {% endif %}
+                        >
+                        Monto mínimo de: <input id="montominimo" name="montominimo" type="text"
+                            {% if isrevisit==1 and saved_item.formato_contribucion_evento=='option2' %}
+                                value={{ saved_item.monto_contribucion_evento }}
+                            {% else %}
+                                checked
+                            {% endif %}
+                        />
+                        </label>
+                        <label class="radio">
+                        <input type="radio" name="optionsRadios" id="optionsRadios" value="option3" 
+                            {% if isrevisit==1 and saved_item.formato_contribucion_evento=='option3' %}
+                                checked="true"
+                            {% else %}
+                                checked=""
+                            {% endif %}
+                        >
+                        Cualquier monto
+                        </label>
+                        </div>                       
+                    </div>
+                </fieldset></div>
+                <div class="btn btn-warning" onclick="volverAPaso1();">No me gustó, quiero elegir de nuevo.</div>
+                <div onclick="publicarEvento(); return false;" class="btn btn-success">
+                    {% if user_id %}
+                    Publica en Facebook!
+                    {% else %}
+                    Registra tu Usuario!
+                    {% endif %}
+                </div>
+            </div>
+        </div>        
+    </div>
+</div>
+<div id="paso3"  {% if isrevisit!=1 or paso=='4' %} style="display:none" {% endif %} >
+    <div class="well form-vertical">
+        <h1>Paso 3 </h1><h2>Para publicar Registra tus datos!</h2><h3>Y empieza a recibir la ayuda de tus amigos y familiares! </h3>
+        <br/>
+        <div class="row">
+            <div class="span5">
+                <h4>Puedes utilizar Facebook</h4>
+                <a href="/social_login/facebook?img_tmp_id={{ tmp_producto_id }}">Facebook Login Image</a>
+            </div>
+            <div class="span5">
+                <h4>También puedes registrar tus datos, si no tienes o no quieres usar Facebook</h4>
+                <form id="form_register" action="{{ url|safe }}" method="post" class="well form-horizontal">
+                    <fieldset>
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                        {{ macros.field(form.username, label=_("Username"), placeholder=_("Enter your")+" "+_("Username"), class="input-xlarge focused required") }}
+                        {{ macros.field(form.name, label=_("Name"), placeholder=_("Enter your")+" "+_("Name"), class="input-xlarge focused") }}
+                        {{ macros.field(form.last_name, label=_("Last Name"), placeholder=_("Enter your")+" "+_("Last Name"), class="input-xlarge focused") }}
+                        {{ macros.field(form.email, label=_("Email"), placeholder=_("Enter your")+" "+_("Email"), class="input-xlarge focused required email", type="email") }}
+                        {{ macros.field(form.password, label=_("Password"), placeholder=_("Enter your")+" "+_("Password"), class="input-xlarge focused required", type="password") }}
+                        {% if not is_mobile %}
+                        {{ macros.field(form.c_password, label=_("Confirm Password"), placeholder=_("Confirm Password"), class="input-xlarge focused required", type="password") }}
+                        {% endif %}
+                        {{ macros.field(form.country, label=_("Country")) }}
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">{% trans %}Sign Up{% endtrans %}</button>
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+        </div>  
+        <div class="btn btn-warning" onclick="volverAPaso2();">Revisar datos de evento.</div>      
+    </div>
+</div>
+
+
+<form id="registrar_evento" action="/postEvent/" method="POST">
+    {% if user_id %}
+    <input type="hidden" name="user" id="user" value="{{ user_id }}"/>
+    {% else %}
+
+    {% endif %}
+    <input type="hidden" name="temp_id" id="temp_id" value=""/>
+    <input type="hidden" name="tipo_evento" id="tipo_evento" value=""/>
+    <input type="hidden" name="fecha_evento" id="fecha_evento" value=""/>
+    <input type="hidden" name="titulo_evento" id="titulo_evento" value=""/>
+    <input type="hidden" name="descripcion" id="descripcion" value=""/>
+    <input type="hidden" name="meta_evento" id="meta_evento" value=""/>
+    <input type="hidden" name="formato_contribucion_evento" id="formato_contribucion_evento" value=""/>
+    <input type="hidden" name="monto_contribucion_evento" id="monto_contribucion_evento" value=""/>
+    <input type="hidden" name="image_url" id="image_url" value=""/>
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+</form>
+ 
+    {% endblock %}
+
+{% block mediaJS %}
+    <script>
+        var results;
+        var elementos_x_pagina=4;
+        var bool_publish_later=false;
+        var tmp_product_id='{{ tmp_producto_id }}';
+        var registrando=0;
+
+        $(function(){
+           $('.burbuja').balloon();
+        });
+
+        
+        
+        function enterPressed(event){
+            
+            var search=false;
+            if ( event.keyCode=='13') {
+                search=true;
+            }
+            if(search){
+                load_images($('#strbusqueda').val());
+            }
+        }
+    </script>
+    <script type="text/javascript">
+        function mensaje_exito(responseText, statusText, xhr, $form){
+           //in this case responseText has the url whatever... 
+           load_image_from_file(responseText);
+        }
+        function enviar_foto_url(data, textStatus, jqXHR){
+              //alert(data);
+              var options={
+                        url:data,
+                        success: mensaje_exito
+                }
+                // submit the form 
+                $('#image_upload').ajaxSubmit(options);
+                // return false to prevent normal browser submit and page navigation 
+                return false; 
+        }
+        function get_url_upload(){
+            $.ajax({
+                url:'/uploadUrl/',
+                success:enviar_foto_url
+            });
+        }
+
+        function enviar_foto(){
+                $("#fotos1").html('');
+              get_url_upload();
+              return false; 
+        }
+       
+        $().ready(function() {
+
+            $('#image_upload').ajaxForm();
+            $('#registrar_evento').ajaxForm();
+            $.datepicker.setDefaults($.datepicker.regional['es']);
+            $( "#datepicker" ).datepicker({
+            showOn: "button",
+            buttonImage: "/img/calendar.gif",
+            buttonImageOnly: true,
+            dateFormat: "dd-MM"
+            });
+
+            
+            $("#form_login_user").validate({
+                submitHandler: function(form) {
+                    form.submit();
+                },
+                errorPlacement: function(error, element) {
+                    element.parent().parent().addClass("error");
+                    error.addClass("help-inline").appendTo( element.parent() );
+                }
+            });
+
+            $("#form_register").validate({
+                submitHandler: function(form) {
+                    form.submit();
+                },
+                rules: {
+                    password: 'required',
+                    c_password: {
+                        required: true,
+                        equalTo: '#password'
+                    }
+                },
+                errorPlacement: function(error, element) {
+                    element.parent().parent().addClass("error");
+                    error.addClass("help-inline").appendTo( element.parent() );
+                }
+            });
+        });
+    </script>
+    <script>
+    $(function() {
+
+        //load_images();
+
+
+    });
+
+    function checkEventDataNotEmpty(){
+        var errores=false;
+        if($('#datepicker').val().length ==''){
+            $('#errorfecha').attr('style','display:block');
+            errores=true; 
+
+        }else{
+            $('#errorfecha').attr('style','display:none');
+        }
+        if($('#titulo').val().length ==''){
+            $('#errortitulo').attr('style','display:block');
+            errores=true; 
+
+        }else{
+            $('#errortitulo').attr('style','display:none');
+        }
+        if($('#subtitulo').val().length ==''){
+            $('#errorsubtitulo').attr('style','display:block');
+            errores=true; 
+
+        }else{
+            $('#errorsubtitulo').attr('style','display:none');
+        }
+        if($('#meta').val().length ==''){
+            $('#errormeta').attr('style','display:block');
+            errores=true; 
+
+        }else{
+            $('#errormeta').attr('style','display:none');
+        }
+
+        if(errores) {
+            return false ;
+        }
+        else{
+            return true; 
+        }
+        
+    }
+
+    function launchFacebookUI(){
+        if (registrando==1){
+            setTimeout('launchFacebookUI()',500);
+            return false;
+        }
+
+        FB.ui(
+          {
+            method: 'feed',
+            name: 'He publicado un nuevo evento con WishFan',
+            link: 'http:{{ fb_channel }}participateInEvent/?temp_id=' + tmp_product_id,
+            picture: $('#foto_seleccionada').attr('src'),
+            caption: $('#titulo').val(),
+            description: $('#subtitulo').val()
+          },
+          function(response) {
+            if (response && response.post_id) {
+              alert('Post was published.');
+              window.location='/'
+            } else {
+              alert('Post was not published.');
+            }
+          }
+        );
+    }
+
+    function publicarEvento(){
+        if (checkEventDataNotEmpty()){
+            //establecemos los datos de la forma
+            $('#temp_id').val(tmp_product_id);
+            $('#tipo_evento').val($('#selectError').val());
+            $('#fecha_evento').val($('#datepicker').val());
+            $('#titulo_evento').val( $('#titulo').val());
+            $('#descripcion').val($('#subtitulo').val());
+            $('#meta_evento').val($('#meta').val());
+            $('#formato_contribucion_evento').val($('[name="optionsRadios"]:checked').val());
+            var formato_contribucion_evento = $('#optionsRadios').val();
+
+            if (formato_contribucion_evento=='option1'){
+                $('#monto_contribucion_evento').val( $('#montofijo').val());
+            }else if(formato_contribucion_evento=='option2'){
+                $('#monto_contribucion_evento').val($('#montominimo').val());
+            }else{
+                $('#monto_contribucion_evento').val( '');
+            }
+            $('#image_url').val($('#foto_seleccionada').attr('src'));
+
+            //mandamos la forma para dar de alta el elemento
+            var options={
+                        success: function(responseText, statusText, xhr, jqwForm){
+                            //alert(responseText);
+                            {% if user_id %}
+                            {% else %}
+                                //una vez guardado, si no hay usuario, entonces tenemos que mandarlo a registrarse
+                                //con la referencia del producto dado de alta para que se asocie al usuario registrado
+                                registrarUsuario();
+                            {% endif %}
+                            registrando=0;
+                        },
+                        error:function(){
+                            alert('Error enviando datos de evento a Base de Datos');
+                            registrando=0;
+                        }
+                }
+                //enviamos la forma
+                registrando=1;
+                $('#registrar_evento').ajaxSubmit(options);
+                {% if user_id %}
+                    setTimeout('launchFacebookUI()',500);
+                {% endif %}
+        } else {
+            //no hacemos nada
+        }
+    }
+
+    function registrarUsuario(){
+        $('#paso2').css('display', 'none');
+        $('#paso3').css('display', 'block');
+    };
+
+    function volverAPaso1(){
+        $('#paso2').css('display', 'none');
+        $('#paso1').css('display', 'block');
+
+    }
+    function volverAPaso2(){
+        $('#paso3').css('display', 'none');
+        $('#paso2').css('display', 'block');
+    }
+    function elegirRegaloFotoLocal(id_imagen, imageUrl){
+        $('#foto_seleccionada').attr("src",imageUrl);
+        $('#paso2').css('display', 'block');
+        $('#paso1').css('display', 'none');
+    }
+    function elegirRegalo(id, title, subtitle, price){
+        urlbusqueda='https://api.mercadolibre.com/items/' + id;
+        imageUrl='';
+        $.ajax({
+            url:urlbusqueda,
+            type:"GET",
+            dataType:"json",
+            success: function(xml){
+               item=xml.pictures;
+               if (item){
+                    index=0;
+                    $.each(item, function (key, val){
+                        index++;
+                        imageUrl=val.url;
+                        $('#foto_seleccionada').attr("src",imageUrl);
+                        /*$('#meta').val(price);
+                        $('#titulo').val(title);
+                        $('#subtitulo').val(subtitle);*/
+
+
+                        return(false);
+                    });
+                    $('#paso2').css('display', 'block');
+                    $('#paso1').css('display', 'none');
+               }
+            }
+        });
+        //alert('elegido ' + id +' title '+ title + 'subtitle' + subtitle);
+    }
+    function load_image_from_file(serving_url){
+        strhtml='';
+        id='1';
+        title='';
+        subtitle='';
+        price='';
+        sid='1';
+        stitle=title;
+        ssubtitle=subtitle;
+        sprice=price;
+        strhtml = strhtml + '<li class="span3" style="word-wrap: break-word;"><div style="background-color:#fff" href="" class="thumbnailn"><img id="' + id + '" src="' + serving_url + '" alt=""/><h4>' + title + '</h4><p>' + subtitle + '</p><p>' + price + '</p><div class="btn btn-success" onclick="elegirRegaloFotoLocal(' + sid + ',\''  + serving_url +'\')">Elegir</div></div></li>';
+        $("#fotos1").html(strhtml);
+        $("#pagination_div").html(" ");
+
+    }
+    function return_paginationcode(results, page_index){
+    
+        num_elementos = results.length;
+        num_paginas = Math.ceil(num_elementos/elementos_x_pagina);
+        var paginacion = '';
+        paginacion= paginacion + '<div class="pagination"><ul>';
+        paginacion= paginacion + '<li><a href="#" onclick="previous_page(' + page_index + ');return false;">Prev</a></li>';
+        for (i=1; i<=num_paginas; i++){
+            paginacion= paginacion + '<li'
+            if(i==page_index){
+                paginacion= paginacion + ' class="active" ';
+            }
+            paginacion= paginacion + '><a href="#" onclick="goto_page('+  i + ');return false; ">'+ i +'</a></li>';
+        }
+        paginacion= paginacion + '<li><a href="#" onclick="next_page(' + page_index + ');return false;">Next</a></li>';
+        paginacion=paginacion + '</ul></div>';
+        return paginacion;
+    }
+    function previous_page(actual_page){
+       
+        num_elementos = results.length;
+        num_paginas = Math.ceil(num_elementos/elementos_x_pagina);
+        if(actual_page>1) goto_page(actual_page-1);
+        
+    }
+    function next_page(actual_page){
+        
+        num_elementos = results.length;
+        num_paginas = Math.ceil(num_elementos/elementos_x_pagina);
+        if(actual_page <num_paginas) goto_page(actual_page +1);
+    }
+    function goto_page( index){
+       
+        num_elementos = results.length;
+        num_paginas = Math.ceil(num_elementos/elementos_x_pagina);
+        if(index>0 && index<=num_paginas){
+
+        }else{
+            index=1;
+        }
+        despliega_imagenes_mercado_libre(results, index);
+
+    }
+    function removenull(strval){
+        if (strval){
+            return strval;
+        }
+        return '';
+    }
+    function removenullimage(id, strval){
+        
+        if (strval){
+            return '<img id="' + id + '" src="' + strval + '" alt=""/>';
+        }else{
+            return '<img width="90" height="90" id="' + id + '" src="/img/placeholder3.gif" alt=""/>';
+        }
+        
+    }
+    function despliega_imagenes_mercado_libre(results, page_index){
+        
+        num_elementos = results.length;
+        num_paginas = Math.ceil(num_elementos/elementos_x_pagina);
+
+        strhtml = '';
+        $("#fotos1").html(strhtml);
+        imagen_inicial = (page_index-1) * elementos_x_pagina ;
+
+        for(i=imagen_inicial; i<imagen_inicial+elementos_x_pagina; i++){
+            if (i<num_elementos){
+                item= results[i];
+                strthumbnail=removenullimage(item.thumbnail);
+                strtitle=removenull(item.title);
+                strsubtitle=removenull(item.subtitle);
+                strprice=removenull(item.price);
+                strcompleteTitle=  strtitle + '<br/> ' + strsubtitle  + '<br/><small>* Precios y títulos de referencia, tú eliges tu meta y la descripción de tu evento.</small>';
+                strprice= formatCurrency(strprice)  + '<br/><small>* Precios y títulos de referencia, tú eliges tu meta y la descripción de tu evento.</small>';
+                //strhtml = strhtml + '<li class="span3" style="word-wrap: break-word;"><div style="background-color:#fff" href="" class="thumbnailn">'+ removenullimage(strthumbnail) +'<h4>' + item.title + '</h4><p>' + item.subtitle + '</p><p>$' + item.price + '</p><div class="btn btn-success" onclick="elegirRegalo(\'' + item.id + '\',\''  + item.title +'\',\''+  item.subtitle + '\',\''+  item.price + '\')">Elegir</div></div></li>';  
+                //icon-question-sign
+                strclase="burbuja"
+                if(i%elementos_x_pagina==0){
+                    strclase="burbujaizq"
+                }else if(i%elementos_x_pagina==elementos_x_pagina-1){
+                    strclase="burbujader"
+                }
+                strhtml = strhtml + '<li class="span3" style="word-wrap: break-word;"><div style="background-color:#fff" href="" class="thumbnailn">'+ removenullimage(item.id, item.thumbnail) +'<i class="'+ strclase +' icon-question-sign" title="'+ strcompleteTitle +'"></i><i class="'+ strclase + ' icon-tags" title="'+ strprice +'"></i><div class="btn btn-success" onclick="elegirRegalo(\'' + item.id + '\',\''  + strtitle +'\',\''+  strsubtitle + '\',\''+  strprice + '\')">Elegir</div></div></li>';  
+            }
+        }
+        $("#pagination_div").html(return_paginationcode(results, page_index));
+        $("#fotos1").html(strhtml);
+        $('.burbuja').balloon();
+        $('.burbujaizq').balloon({ position: "top right" });
+        $('.burbujader').balloon({ position: "top left" });
+        $('.loadimg').imagesLoaded(function($images, $proper, $broken){$images.show();});
+        
+    }
+    function formatCurrency(num) {
+        num = num.toString().replace(/\$|\,/g, '');
+        if (isNaN(num)) num = "0";
+        sign = (num == (num = Math.abs(num)));
+        num = Math.floor(num * 100 + 0.50000000001);
+        cents = num % 100;
+        num = Math.floor(num / 100).toString();
+        if (cents < 10) cents = "0" + cents;
+        for (var i = 0; i < Math.floor((num.length - (1 + i)) / 3); i++)
+        num = num.substring(0, num.length - (4 * i + 3)) + ',' + num.substring(num.length - (4 * i + 3));
+        return (((sign) ? '' : '-') + '$' + num + '.' + cents);
+    }
+    function load_images(descripcion) {
+        urlbusqueda= 'https://api.mercadolibre.com/sites/MLM/search?q=' + descripcion + '&sort=price_desc&callback=?',
+        $.ajax({
+            url: urlbusqueda,
+            type: "GET",
+            dataType: "json",
+            error: function(jqXHR, textStatus, errorThrown) {
+                alert(textStatus);
+            },
+            success: function(xml){
+                results=xml[2].results;
+                goto_page(1);
+            }
+        });
+    }
+    </script>
+{% endblock %}
+

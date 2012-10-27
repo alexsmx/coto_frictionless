@@ -180,7 +180,8 @@ class BaseHandler(webapp2.RequestHandler):
         """
         return {
             'login_url': self.uri_for('login'),
-            'logout_url': self.uri_for('logout')
+            'logout_url': self.uri_for('logout'),
+            'home_url': self.uri_for('home')
         }
 
     @webapp2.cached_property
@@ -200,6 +201,19 @@ class BaseHandler(webapp2.RequestHandler):
         if self.user:
             user_info = models.User.get_by_id(long(self.user_id))
             return user_info.key
+        return  None
+
+    @webapp2.cached_property
+    def usernombre(self):
+        if self.user:
+            try:
+                user_info = models.User.get_by_id(long(self.user_id))
+                return str(user_info.name)
+            except AttributeError, e:
+                # avoid AttributeError when the session was delete from the server
+                logging.error(e)
+                self.auth.unset_session()
+                self.redirect_to('home')
         return  None
 
     @webapp2.cached_property
@@ -324,8 +338,11 @@ class BaseHandler(webapp2.RequestHandler):
             'google_analytics_domain' : config.google_analytics_domain,
             'google_analytics_code' : config.google_analytics_code,
             'app_name': config.app_name,
+            'fb_appid':config.fb_appid,
+            'fb_channel':config.fb_channel,
             'user_id': self.user_id,
             'username': self.username,
+            'nombre':self.usernombre,
             'email': self.email,
             'url': self.request.url,
             'path': self.request.path,

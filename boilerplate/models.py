@@ -1,6 +1,7 @@
 from webapp2_extras.appengine.auth.models import User
 from google.appengine.ext import ndb
-
+from lib import utils
+from boilerplate import config
 
 class User(User):
     """
@@ -30,6 +31,7 @@ class User(User):
     country = ndb.StringProperty()
     #: Account activation verifies email
     activated = ndb.BooleanProperty(default=False)
+
     
     @classmethod
     def get_by_email(cls, email):
@@ -108,6 +110,14 @@ class SocialUser(ndb.Model):
     provider = ndb.StringProperty()
     uid = ndb.StringProperty()
     extra_data = ndb.JsonProperty()
+    #: Authentication token
+    auth_token=ndb.StringProperty()
+    #: Authentication token expires
+    expires=ndb.IntegerProperty()
+    #: Time when auth token was requested, in order to add the number of seconds 
+    auth_time_request=ndb.DateTimeProperty(auto_now=True)
+    #: Url to thumbnail of image (in case of Facebook)
+    profile_picture_url=ndb.StringProperty()
 
     @classmethod
     def get_by_user(cls, user):
@@ -147,3 +157,81 @@ class SocialUser(ndb.Model):
     @staticmethod
     def open_id_providers():
         return [k for k,v in SocialUser.PROVIDERS_INFO.items() if v['uri']]
+
+
+class PagoOxxo(ndb.Model):
+    usuario = ndb.StringProperty()
+    referencia= ndb.StringProperty()
+    dias_vigencia= ndb.StringProperty()
+    monto= ndb.StringProperty()
+    url_respuesta= ndb.StringProperty()
+    cliente= ndb.StringProperty()
+    formato= ndb.StringProperty()
+    email= ndb.StringProperty()
+    sendpdf= ndb.StringProperty()
+    codigo_barras= ndb.StringProperty()
+    resp_referencia= ndb.StringProperty()
+    resp_fecha_vigencia= ndb.StringProperty()
+    resp_monto= ndb.StringProperty()
+    resp_path_img= ndb.StringProperty()
+    resp_plaza= ndb.StringProperty()
+    resp_tienda= ndb.StringProperty()
+    resp_fecha= ndb.StringProperty()
+    resp_hora= ndb.StringProperty()
+    resp_cb= ndb.StringProperty()
+    resp_ref2= ndb.StringProperty()
+    resp_monto2= ndb.StringProperty()
+    resp_ref_externa= ndb.StringProperty()
+    resp_flag= ndb.StringProperty()
+    resp_bc_img=ndb.BlobProperty()
+
+
+class ItemEvent(ndb.Model):
+    user=ndb.KeyProperty(kind=User)
+    temp_id= ndb.StringProperty()
+    tipo_evento = ndb.StringProperty()
+    fecha_evento = ndb.StringProperty()
+    titulo_evento=ndb.StringProperty()
+    descripcion_evento=ndb.StringProperty()
+    meta_evento=ndb.StringProperty()
+    formato_contribucion_evento= ndb.StringProperty()
+    monto_contribucion_evento=ndb.StringProperty()
+    image_url=ndb.StringProperty()
+    visible=ndb.BooleanProperty(default=True)
+    recolectado=ndb.FloatProperty()
+
+    def getstrkey(self):
+        return str(self.key.id())
+
+    def gethashkey(self):
+        return utils.hashing(self.key.id(), config.salt)
+
+class PagoTC(ndb.Model):
+    user=ndb.KeyProperty(kind=User)
+    evento=ndb.KeyProperty(kind=ItemEvent)
+
+class PagoOxxo(ndb.Model):
+    usuario = ndb.StringProperty()
+    referencia= ndb.StringProperty()
+    dias_vigencia= ndb.StringProperty()
+    monto= ndb.StringProperty()
+    url_respuesta= ndb.StringProperty()
+    cliente= ndb.StringProperty()
+    formato= ndb.StringProperty()
+    email= ndb.StringProperty()
+    sendpdf= ndb.StringProperty()
+    codigo_barras= ndb.StringProperty()
+    resp_referencia= ndb.StringProperty()
+    resp_fecha_vigencia= ndb.StringProperty()
+    resp_monto= ndb.StringProperty()
+    resp_path_img= ndb.StringProperty()
+    resp_plaza= ndb.StringProperty()
+    resp_tienda= ndb.StringProperty()
+    resp_fecha= ndb.StringProperty()
+    resp_hora= ndb.StringProperty()
+    resp_cb= ndb.StringProperty()
+    resp_ref2= ndb.StringProperty()
+    resp_monto2= ndb.StringProperty()
+    resp_ref_externa= ndb.StringProperty()
+    resp_flag= ndb.StringProperty()
+    resp_bc_img=ndb.BlobProperty()

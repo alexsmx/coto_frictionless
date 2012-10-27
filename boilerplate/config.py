@@ -1,4 +1,4 @@
-app_name = "Google App Engine Boilerplate"
+app_name = "WishFan: Crowdfunding de tus Regalos y Eventos."
 
 webapp2_config = {}
 webapp2_config['webapp2_extras.sessions'] = {
@@ -83,8 +83,8 @@ DEVELOPERS = (
 )
 
 #facebook strings for development and production
-fb_channel_file_prod ='http://wishfan.com/channel.html'
-fb_channel_file_dev='http://localhost:8109/channel.html'
+fb_channel_file_prod ='//wishfan.com/'
+fb_channel_file_dev='//localhost:8109/'
 fb_appid_dev='341668639255311'
 fb_secret_dev='b72d5386c6d5e1eda28db682a9313117'
 fb_appid_prod='141940912616975'
