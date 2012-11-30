@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>{% extends base_layout %}
+{% block title %}
+        {% trans %}Mensaje{% endtrans %} - {{app_name}}
+{% endblock %}
+{% block navbar %}
+{% endblock %}
+{% block header_title %}
+        {% trans %}Transacción completa{% endtrans %}
+{% endblock %}
+
+
+{% block content %}
+<div class="well">
+    <div class="btn btn-success" onclick="close_paypal_dialog(); return false; ">
+        El pago fue exitoso! (Ref. {{ paykey }})
+    </div>
+</div>
+{% endblock %}
+{% block mediaJS %}
+<script type="text/javascript" src="https://www.paypalobjects.com/js/external/dg.js"></script>
+ <script type="text/javascript">
+    function close_paypal_dialog(){
+        top.location.href='/';
+    }
+
+    $(document).ready(function() {
+        
+    });
+  </script>
+{% endblock %}

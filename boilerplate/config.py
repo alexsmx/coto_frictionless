@@ -1,3 +1,4 @@
+import mycustfilters
 app_name = "WishFan: Crowdfunding de tus Regalos y Eventos."
 
 webapp2_config = {}
@@ -11,6 +12,10 @@ webapp2_config['webapp2_extras.auth'] = {
 webapp2_config['webapp2_extras.jinja2'] = {
     'template_path': ['templates','boilerplate/templates'],
     'environment_args': {'extensions': ['jinja2.ext.i18n']},
+    'filters':{
+        'format_currency_w_money':mycustfilters.format_currency_w_money,
+        'format_currency_wo_money':mycustfilters.format_currency_wo_money,
+    }
 }
 webapp2_config['webapp2_extras.i18n'] = {
     'default_locale': 'es_ES',
@@ -73,6 +78,7 @@ enable_federated_login = True
 
 # jinja2 base layout templates
 base_layout = 'boilerplate_base.html'
+base_layout_format = 'boilerplate_base_format.html'
 
 # send error emails to developers
 send_mail_developer = True
@@ -91,3 +97,13 @@ fb_appid_prod='141940912616975'
 fb_secret_prod='0747d18cead11ef69839d6f72a3c4161'
 fb_channel=''
 fb_appid=''
+
+#payment methods enabled
+payment_methods={
+    'paypal':False,
+    'banwireTC':False,
+    'banwireOXXO':False
+}
+
+#test fb ids
+test_facebook_ids={'alexs_mx@hotmail.com':True}

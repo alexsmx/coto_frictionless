@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 {% extends base_layout %}
 
 {% block header_title_lead %}{% endblock %}
@@ -40,7 +41,7 @@
             <div class="span4">
                 <ul class="thumbnails">
                   <li class="span3">
-                    <a href="#" class="thumbnail">
+                    <a href="#" onclick="return false; " class="thumbnail">
                       <img id="foto_seleccionada" 
                       {% if isrevisit==1 %}
                          src="{{ saved_item.image_url}}"
@@ -76,7 +77,15 @@
                     <div class="control-group">
                         <label class="control-label" for="inputWarning">Fecha del evento:</label>
                         <div class="controls">
-                            <input type="text" id="datepicker" name="datepicker"
+                            <div class="btn disabled" id="btnFecha" name="btnFecha">
+                                {% if isrevisit==1 %}
+                                    {{ saved_item.fecha_evento}}
+                                {% else %}
+                                    Elegir fecha
+                                {% endif %}
+                            </div>
+                            <input type="hidden"  id="dpshowdt" name="dpshowdt">
+                            <input type="hidden" id="datepicker" name="datepicker"
                                 {% if isrevisit==1 %}
                                     value="{{ saved_item.fecha_evento}}"
                                 {% else %}
@@ -124,13 +133,15 @@
                             <div class="controls">
                             <input type="text" id="meta"
                                 {% if isrevisit==1 %}
-                                    value="{{ saved_item.meta_evento}}"
+                                    value="{{ saved_item.meta_evento|format_currency_wo_money }}"
                                 {% else %}
                                     value="" 
                                 {% endif %}
                             >
                             <div id="errormeta" class="alert"
                             name="errormeta" style="display:none;" >Debes establecer una meta de recaudación para tu evento.</div>
+                            <div id="errormetanumerica" class="alert"
+                            name="errormetanumerica" style="display:none;" >La meta debe ser un número.</div>
                         </div>
                     </div>
 
@@ -148,11 +159,15 @@
                          >
                         Monto fijo de: <input id="montofijo" name="montofijo" type="text"
                             {% if isrevisit==1 and saved_item.formato_contribucion_evento=='option1' %}
-                                value={{ saved_item.monto_contribucion_evento }}
+                                value={{ saved_item.monto_contribucion_evento|format_currency_wo_money }}
                             {% else %}
                                 
                             {% endif %}
                          >
+                          <div id="errormontofijo" class="alert"
+                            name="errormontofijo" style="display:none;" >Debes establecer un monto de recaudación fijo.</div>
+                            <div id="errormontofijonumerica" class="alert"
+                            name="errormontofijonumerica" style="display:none;" >El monto fijo debe ser un número.</div>
                         </label>
                         <label class="radio">
                         <input type="radio" name="optionsRadios" id="optionsRadios" value="option2"
@@ -164,18 +179,20 @@
                         >
                         Monto mínimo de: <input id="montominimo" name="montominimo" type="text"
                             {% if isrevisit==1 and saved_item.formato_contribucion_evento=='option2' %}
-                                value={{ saved_item.monto_contribucion_evento }}
+                                value={{ saved_item.monto_contribucion_evento|format_currency_wo_money }}
                             {% else %}
                                 checked
                             {% endif %}
                         />
+                        <div id="errormontominimo" class="alert"
+                            name="errormontominimo" style="display:none;" >Debes establecer moto mínimo.</div>
+                            <div id="errormontominimonumerica" class="alert"
+                            name="errormontominimonumerica" style="display:none;" >El monto mínimo debe ser un número.</div>
                         </label>
                         <label class="radio">
                         <input type="radio" name="optionsRadios" id="optionsRadios" value="option3" 
                             {% if isrevisit==1 and saved_item.formato_contribucion_evento=='option3' %}
                                 checked="true"
-                            {% else %}
-                                checked=""
                             {% endif %}
                         >
                         Cualquier monto
@@ -183,10 +200,20 @@
                         </div>                       
                     </div>
                 </fieldset></div>
-                <div class="btn btn-warning" onclick="volverAPaso1();">No me gustó, quiero elegir de nuevo.</div>
-                <div onclick="publicarEvento(); return false;" class="btn btn-success">
+                <div class="btn btn-warning" onclick="volverAPaso1();">
+                    {% if isrevisit==1 %}
+                        Quiero elegir otra imágen.
+                    {% else %}
+                        No me gustó, quiero elegir de nuevo.
+                    {% endif %}                    
+                </div>
+                <div id="cmdPublicarEvento" name="cmdPublicarEvento" onclick="publicarEvento(); return false;" class="btn btn-success">
                     {% if user_id %}
-                    Publica en Facebook!
+                        {% if action=='edit' %}
+                            Guardar Cambios
+                        {% else %}
+                            Publica en Facebook!
+                        {% endif %}
                     {% else %}
                     Registra tu Usuario!
                     {% endif %}
@@ -202,8 +229,9 @@
         <div class="row">
             <div class="span5">
                 <h4>Puedes utilizar Facebook</h4>
-                <a href="/social_login/facebook?img_tmp_id={{ tmp_producto_id }}">Facebook Login Image</a>
+                <a href="/social_login/facebook?img_tmp_id={{ tmp_producto_id }}"><img src="/img/fb_connect.png"></a>
             </div>
+            {% if False %}
             <div class="span5">
                 <h4>También puedes registrar tus datos, si no tienes o no quieres usar Facebook</h4>
                 <form id="form_register" action="{{ url|safe }}" method="post" class="well form-horizontal">
@@ -224,11 +252,37 @@
                     </fieldset>
                 </form>
             </div>
-        </div>  
+            {% endif %}
+        </div>
+        <br/>
+        <br/>  
         <div class="btn btn-warning" onclick="volverAPaso2();">Revisar datos de evento.</div>      
     </div>
 </div>
-
+<div class="modal hide" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3 id="myModalLabel">Publicando en Facebook</h3>
+  </div>
+  <div class="modal-body">
+    <div id="procesando_pago">
+        <p>Se está enviando la información a facebook</p>
+        <div class="progress progress-striped active">
+            <div class="bar" style="width: 100%;"></div>
+        </div>
+    </div>
+    <div id="procesando_exitoso">
+        <p>Se publicó en Facebook</p>
+        <button onclick="window.location.href='/';return false;"class="btn btn-primary" data-dismiss="modal" aria-hidden="true">Continuar</button>
+    </div>
+    <div id="procesando_fallido" style="display:none">
+        <p>No se pudo enviar la información a Facebook.</p>
+        <button class="btn btn-primary" data-dismiss="modal" aria-hidden="true">Continuar</button>
+    </div>
+  </div>
+  <div class="modal-footer">
+  </div>
+</div>
 
 <form id="registrar_evento" action="/postEvent/" method="POST">
     {% if user_id %}
@@ -259,7 +313,7 @@
         var registrando=0;
 
         $(function(){
-           $('.burbuja').balloon();
+           $('.burbuja').balloon({minLifetime: 250, showDuration: 0, hideDuration: 250});
         });
 
         
@@ -303,7 +357,11 @@
               get_url_upload();
               return false; 
         }
-       
+        
+        function updateFecha(){
+            alert('ok');
+        }
+
         $().ready(function() {
 
             $('#image_upload').ajaxForm();
@@ -313,9 +371,17 @@
             showOn: "button",
             buttonImage: "/img/calendar.gif",
             buttonImageOnly: true,
-            dateFormat: "dd-MM"
+            dateFormat: "dd-mm-yy",
+            altField:"#dpshowdt",
+            altFormat:"dd-MM"  ,
+            onSelect: function(){
+                    $("#btnFecha").html($("#dpshowdt").val());
+                }
             });
-
+            {% if isrevisit ==1 %}
+                var currentDate = $( "#datepicker" ).datepicker( "getDate" );
+                $("#btnFecha").html($.datepicker.formatDate( "dd-MM", currentDate ));
+            {% endif %}
             
             $("#form_login_user").validate({
                 submitHandler: function(form) {
@@ -353,8 +419,15 @@
 
     });
 
+    function isNumber(n) {
+      return !isNaN(parseFloat(n)) && isFinite(n);
+    }
+
     function checkEventDataNotEmpty(){
         var errores=false;
+        meta=removenumericcomma($('#meta').val());
+        montofijo=removenumericcomma($('#montofijo').val());
+        montominimo=removenumericcomma($('#montominimo').val());
         if($('#datepicker').val().length ==''){
             $('#errorfecha').attr('style','display:block');
             errores=true; 
@@ -376,12 +449,56 @@
         }else{
             $('#errorsubtitulo').attr('style','display:none');
         }
-        if($('#meta').val().length ==''){
+        if(meta.length ==''){
             $('#errormeta').attr('style','display:block');
             errores=true; 
 
         }else{
             $('#errormeta').attr('style','display:none');
+        }
+        if(!isNumber(meta)){
+            $('#errormetanumerica').attr('style','display:block');
+            errores=true; 
+
+        }else{
+            $('#errormetanumerica').attr('style','display:none');
+        }
+        //checamos las opciones de pago
+        var formato_contribucion_evento = $('[name="optionsRadios"]:checked').val();
+        if (formato_contribucion_evento=='option1'){
+            $('#errormontominimo').attr('style','display:none');
+            $('#errormontominimonumerica').attr('style','display:none');
+            if(montofijo.length ==''){
+                $('#errormontofijo').attr('style','display:block');
+                errores=true; 
+            }else{
+            }
+             if(!isNumber(montofijo)){
+                $('#errormontofijonumerica').attr('style','display:block');
+                errores=true; 
+            }else{
+                $('#errormontofijonumerica').attr('style','display:none');
+            }
+        }else if( formato_contribucion_evento=='option2'){
+             $('#errormontofijo').attr('style','display:none');
+             $('#errormontofijonumerica').attr('style','display:none');
+            if(montominimo.length ==''){
+                $('#errormontominimo').attr('style','display:block');
+                errores=true; 
+            }else{
+                $('#errormontominimo').attr('style','display:none');
+            }
+             if(!isNumber(montominimo)){
+                $('#errormontominimonumerica').attr('style','display:block');
+                errores=true; 
+            }else{
+                $('#errormontominimonumerica').attr('style','display:none');
+            }
+        }else if(formato_contribucion_evento=='option3'){
+            $('#errormontominimo').attr('style','display:none');
+            $('#errormontominimonumerica').attr('style','display:none');
+            $('#errormontofijo').attr('style','display:none');
+            $('#errormontofijonumerica').attr('style','display:none');
         }
 
         if(errores) {
@@ -394,47 +511,79 @@
     }
 
     function launchFacebookUI(){
+        $('#procesando_fallido').hide();
+        $('#procesando_exitoso').hide();
+       
         if (registrando==1){
             setTimeout('launchFacebookUI()',500);
             return false;
         }
-
+        var local_tmp_product_id= tmp_product_id;
         FB.ui(
           {
             method: 'feed',
             name: 'He publicado un nuevo evento con WishFan',
-            link: 'http:{{ fb_channel }}participateInEvent/?temp_id=' + tmp_product_id,
+            link: 'http:{{ fb_channel }}participateInEvent/?temp_id=' + local_tmp_product_id,
             picture: $('#foto_seleccionada').attr('src'),
             caption: $('#titulo').val(),
             description: $('#subtitulo').val()
           },
           function(response) {
             if (response && response.post_id) {
-              alert('Post was published.');
-              window.location='/'
+                $('#myModal').modal('show');
+                $('#procesando_pago').hide();
+                $('#procesando_exitoso').show();
+                $('#procesando_fallido').hide();
+                $('#cmdPublicarEvento').removeClass('disabled');
+                url='/facebookPostSuccess/';
+                data={
+                        'facebook_post_id': response.post_id , 
+                        'item_temp_id': local_tmp_product_id,
+                        '_csrf_token': '{{ csrf_token() }}'
+                    };
+                $.ajax({
+                  type: 'POST',
+                  url: url,
+                  data: data,
+                  success: function(data){
+                    //alert('stored facebook post_id!');
+                  },
+                  error: function(){
+                    //alert('error storing facebook post_id');
+                  }
+                });
             } else {
-              alert('Post was not published.');
+                $('#myModal').modal('show');
+                $('#procesando_pago').hide();
+                $('#procesando_exitoso').hide();
+                $('#procesando_fallido').show();
+                $('#cmdPublicarEvento').removeClass('disabled');
             }
           }
         );
+        
     }
 
     function publicarEvento(){
+
         if (checkEventDataNotEmpty()){
             //establecemos los datos de la forma
+            meta=removenumericcomma($('#meta').val());
+            montofijo=removenumericcomma($('#montofijo').val());
+            montominimo=removenumericcomma($('#montominimo').val());
             $('#temp_id').val(tmp_product_id);
             $('#tipo_evento').val($('#selectError').val());
             $('#fecha_evento').val($('#datepicker').val());
             $('#titulo_evento').val( $('#titulo').val());
             $('#descripcion').val($('#subtitulo').val());
-            $('#meta_evento').val($('#meta').val());
+            $('#meta_evento').val(meta);
             $('#formato_contribucion_evento').val($('[name="optionsRadios"]:checked').val());
-            var formato_contribucion_evento = $('#optionsRadios').val();
+            var formato_contribucion_evento = $('[name="optionsRadios"]:checked').val()
 
             if (formato_contribucion_evento=='option1'){
-                $('#monto_contribucion_evento').val( $('#montofijo').val());
+                $('#monto_contribucion_evento').val( montofijo);
             }else if(formato_contribucion_evento=='option2'){
-                $('#monto_contribucion_evento').val($('#montominimo').val());
+                $('#monto_contribucion_evento').val(montominimo);
             }else{
                 $('#monto_contribucion_evento').val( '');
             }
@@ -445,6 +594,9 @@
                         success: function(responseText, statusText, xhr, jqwForm){
                             //alert(responseText);
                             {% if user_id %}
+                                {% if action=='edit' %}
+                                    window.location.href="/";
+                                {% endif %}
                             {% else %}
                                 //una vez guardado, si no hay usuario, entonces tenemos que mandarlo a registrarse
                                 //con la referencia del producto dado de alta para que se asocie al usuario registrado
@@ -461,7 +613,12 @@
                 registrando=1;
                 $('#registrar_evento').ajaxSubmit(options);
                 {% if user_id %}
-                    setTimeout('launchFacebookUI()',500);
+                    {% if action=='edit' %}
+
+                    {% else %}
+                        $('#cmdPublicarEvento').addClass('disabled');
+                        setTimeout('launchFacebookUI()',500);
+                    {% endif %}
                 {% endif %}
         } else {
             //no hacemos nada
@@ -574,9 +731,15 @@
         despliega_imagenes_mercado_libre(results, index);
 
     }
+    function removesinglecomma(strval){
+        return  String(strval).replace(/'/g, "");
+    }
+    function removenumericcomma(strval){
+        return  String(strval).replace(/,/g, "");
+    }
     function removenull(strval){
         if (strval){
-            return strval;
+            return String(strval).replace(/'/g, "");
         }
         return '';
     }
@@ -604,8 +767,8 @@
                 strthumbnail=removenullimage(item.thumbnail);
                 strtitle=removenull(item.title);
                 strsubtitle=removenull(item.subtitle);
-                strprice=removenull(item.price);
-                strcompleteTitle=  strtitle + '<br/> ' + strsubtitle  + '<br/><small>* Precios y títulos de referencia, tú eliges tu meta y la descripción de tu evento.</small>';
+                strprice=removesinglecomma(removenull(item.price));
+                strcompleteTitle=  '</div>' + strtitle + '<br/> ' + strsubtitle  + '<br/><small>* Precios y títulos de referencia, tú eliges tu meta y la descripción de tu evento.</small>';
                 strprice= formatCurrency(strprice)  + '<br/><small>* Precios y títulos de referencia, tú eliges tu meta y la descripción de tu evento.</small>';
                 //strhtml = strhtml + '<li class="span3" style="word-wrap: break-word;"><div style="background-color:#fff" href="" class="thumbnailn">'+ removenullimage(strthumbnail) +'<h4>' + item.title + '</h4><p>' + item.subtitle + '</p><p>$' + item.price + '</p><div class="btn btn-success" onclick="elegirRegalo(\'' + item.id + '\',\''  + item.title +'\',\''+  item.subtitle + '\',\''+  item.price + '\')">Elegir</div></div></li>';  
                 //icon-question-sign
@@ -620,10 +783,14 @@
         }
         $("#pagination_div").html(return_paginationcode(results, page_index));
         $("#fotos1").html(strhtml);
-        $('.burbuja').balloon();
-        $('.burbujaizq').balloon({ position: "top right" });
-        $('.burbujader').balloon({ position: "top left" });
+        $('.burbuja').balloon({ classname: "balloonTip" });
+        $('.burbuja').click(function(){$(this).hideBalloon();});
+        $('.burbujaizq').balloon({ position: "top right",classname: "balloonTip"  });
+        $('.burbujaizq').click(function(){$(this).hideBalloon();});
+        $('.burbujader').balloon({ position: "top left" ,classname: "balloonTip" });
+        $('.burbujader').click(function(){$(this).hideBalloon();});
         $('.loadimg').imagesLoaded(function($images, $proper, $broken){$images.show();});
+        $('.balloonTip').click(function(){alert('ok');});
         
     }
     function formatCurrency(num) {

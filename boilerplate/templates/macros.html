@@ -1,13 +1,13 @@
-<!-- Renders a form field with errors, required flags, and common styling.  
-	html element fields such as class, style, or type can be passed as kwargs.
-	Usage: macros.field(form.username, class="input-xlarge", type="email") -->
+<?xml version="1.0" encoding="utf-8"?><!-- Renders a form field with errors, required flags, and common styling.  
+    html element fields such as class, style, or type can be passed as kwargs.
+    Usage: macros.field(form.username, class="input-xlarge", type="email") -->
 {% macro field(field, label='') -%}
             <div class="control-group{% if field.errors %} error{% endif %}">
-            	{% set text = label or field.label.text %}
-            	{% if field.flags.required %}
-                	{{ field.label(text=text + " *", class="control-label") }}
+                {% set text = label or field.label.text %}
+                {% if field.flags.required %}
+                    {{ field.label(text=text + " *", class="control-label") }}
                 {% else %}
-                	{{ field.label(text=text + " ", class="control-label") }}
+                    {{ field.label(text=text + " ", class="control-label") }}
                 {% endif %}
                 <div class="controls">
                 {{ field(**kwargs) }}

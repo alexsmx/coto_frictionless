@@ -1,3 +1,4 @@
+
 # *-* coding: UTF-8 *-*
 
 # standard library imports
@@ -309,6 +310,14 @@ class BaseHandler(webapp2.RequestHandler):
         """
         return self.base_layout if hasattr(self, 'base_layout') else config.base_layout
 
+    @webapp2.cached_property
+    def get_base_layout_format(self):
+        """
+        Get the current base layout template for jinja2 templating. Uses the variable base_layout set in config
+        or if there is a base_layout defined, use the base_layout.
+        """
+        return self.base_layout_format if hasattr(self, 'base_layout_format') else config.base_layout_format
+
     def set_base_layout(self, layout):
         """
         Set the base_layout variable, thereby overwriting the default layout template name in config.py.
@@ -356,7 +365,10 @@ class BaseHandler(webapp2.RequestHandler):
             'provider_uris': self.provider_uris,
             'provider_info': self.provider_info,
             'enable_federated_login': config.enable_federated_login,
-            'base_layout': self.get_base_layout
+            'base_layout': self.get_base_layout,
+            'base_layout_format': self.get_base_layout_format,
+            'payment_methods': config.payment_methods,
+            'test_facebook_ids':config.test_facebook_ids
             })
         kwargs.update(self.auth_config)
         if hasattr(self, 'form'):

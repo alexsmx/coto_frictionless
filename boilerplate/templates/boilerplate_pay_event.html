@@ -1,4 +1,4 @@
-{% extends base_layout %}
+<?xml version="1.0" encoding="utf-8"?>{% extends base_layout %}
 
 {% block title %}
         {% trans %}Evento{% endtrans %} - {{app_name}}
@@ -11,20 +11,60 @@
 <div class="well">
 <h1>Escoge el método de contribución que más te convenga.</h1>
     <div id="tabs" style="display:none">
-        <ul>
-            <li><a href="#tabs-1">Tarjeta de Crédito <i class="icon-question-sign"></i></a></li>
+        <ul><li><a href="#tabs-4">PayPal <i class="icon-question-sign"></i></a></li>
+            <li>
+                <a href="#tabs-1">Tarjeta de Crédito 
+                    <i class="icon-question-sign"></i>
+                    {% if test_facebook_ids[email]  %}
+                        <a href="#" onclick="setupTestBanwireTCPayment();return false;">
+                        <i class="icon-hand-down"></i>
+                    </a>
+                    {% endif%} 
+                </a>
+            </li>
             <li><a href="#tabs-2">OXXO <i class="icon-question-sign"></i></a></li>
-            <li><a href="#tabs-3">Datos del Evento</a></li>
+            <li><a href="#tabs-3">Datos del Evento </a></li>
         </ul>
+        <div id="tabs-4">
+            <div class="row">
+                <div class="well">
+                    {% if payment_methods['paypal']==False %}
+                        <div class="alert alert-block">
+                            Estamos trabajando en la implementación de este método de pago, te mantendremos informado. 
+                        </div>        
+                    {% endif%}
+                    <form id="datos_pago_paypal" name="datos_pago_paypal" method="POST" action="/pagarPayPal/">
+                        <h1>Monto a Contribuir</h1>
+                            {% if producto.formato_contribucion_evento =='option1' %}
+                            <h2>$ {{ producto.monto_contribucion_evento }}</h2>
+                             <input type="hidden" id="montopaypal" name="montopaypal" value="{{ producto.monto_contribucion_evento }}">
+                            {% else %}
+                            Monto de contribución:<input type="text" id="montopaypal" name="montopaypal" value="">
+                            {% endif %}
+                            <div  id="continuePayPal" name="continuePayPal" onclick="sendPaymentPayPal();return false;" class="btn btn-success"><h3>Continuar</h3></div>
+                    </form>
+                    <form action= "https://www.sandbox.paypal.com/webapps/adaptivepayment/flow/pay" target="PPDGFrame">
+                         <input id="type" type="hidden" name="expType" value="light"></input>
+                         <input id="paykey" type="hidden" name="paykey" value="The Paykey we got in the response"> </input>
+                         <div id="submitBtn" class="btn disabled hidden" value="Pay with PayPal"><h3>Pay</h3></div>
+                     </form>
+                </div>
+            </div>
+        </div>
         <div id="tabs-1">
             <div class="row">
                 <form id="datos_pago_tc" name="datos_pago_tc" method="POST" action="/pagar/">
                     <div class="span7">
+                        {% if payment_methods['banwireTC']==False %}
+                            <div class="alert alert-block">
+                                Estamos trabajando en la implementación de este método de pago, te mantendremos informado. 
+                            </div>        
+                        {% endif%}
                         <table>
                             <tr><td>Nombre</td><td>Apellido Paterno</td><td>Apellido Materno</td></tr>
-                            <tr><td><input id="nombre" name="nombre" value="Roberto I"></input></td><td> <input id="paterno" name="paterno" value="Ramirez"></input></td><td> <input id="materno" name="materno" value="N"></input></td></tr>
+                            <tr><td><input id="nombre" name="nombre" value=""></input></td><td> <input id="paterno" name="paterno" value=""></input></td><td> <input id="materno" name="materno" value=""></input></td></tr>
                             <tr><td>Teléfono</td><td>Correo electrónico (para aclaraciones)</td></tr>
-                            <tr><td><input id="telefono" name="telefono" value="15799155"></input></td><td><input id="emailtc" name="emailtc" value="jruiz@banwire.com"></td></tr>
+                            <tr><td><input id="telefono" name="telefono" value=""></input></td><td><input id="emailtc" name="emailtc" value=""></td></tr>
                             <tr><td>Tarjeta</td></tr>
                             <tr><td>
                                 <select id="id_tarjeta" name="id_tarjeta">
@@ -34,47 +74,66 @@
                                 </select>
                             </td></tr>
                             <tr><td>Número de Tarjeta</td><td>Código de Seguridad</td><td>Fecha de Vencimiento</td></tr>
-                            <tr><td><input id="numero_tarjeta" name="numero_tarjeta" value="5204164299999999"></input></td><td><input id="numero_ccv" name="numero_ccv" value="999"></input></td><td><input id="vencimiento" name="vencimiento" value="11/12"></input></td></tr>
+                            <tr><td><input id="numero_tarjeta" name="numero_tarjeta" value=""></input></td><td><input id="numero_ccv" name="numero_ccv" value=""></input></td><td><input id="vencimiento" name="vencimiento" value=""></input></td></tr>
                             <tr><td>Calle</td><td>Número Exterior</td><td>Número Interior</td></tr>
-                            <tr><td><input id="calle" name="calle" value="Horacio"></input></td><td> <input id="num__ext" name="num_ext" value=""></input></td><td><input id="num_int" name="num_int" value=""></input> </td></tr>
+                            <tr><td><input id="calle" name="calle" value=""></input></td><td> <input id="num__ext" name="num_ext" value=""></input></td><td><input id="num_int" name="num_int" value=""></input> </td></tr>
                             <tr><td>Código Postal</td></tr>
-                            <tr><td><input id="codigo_postal" name="codigo_postal" value="11560"></input></td></tr>
+                            <tr><td><input id="codigo_postal" name="codigo_postal" value=""></input></td></tr>
                             <tr><td>Ciudad</td><td>Municipio</td><td>Colonia</td></tr>
                             <tr><td><input id="ciudad" name="ciudad" value=""></input></td><td><input id="municipio" name="municipio" value=""></input></td><td><input id="colonia" name="colonia" value=""></input>
                             <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                             <input type="hidden" name="tipo_pago" value="TC"/>
-                            <input type="hidden" name="tc_img_tmp_id" value="{{ producto.tmp_id }}">
+                            <input type="hidden" name="tc_img_tmp_id" value="{{ producto.temp_id }}">
                             </td></tr>
                         </table>
                     </div>
                     <div class="span4 ">
                         <div class="well">
                             <h1>Monto a Contribuir</h1>
-                            {% if producto.formato_contribucion_evento =='option1' %}
-                            <h2>$ {{ producto.monto_contribucion_evento }}</h2>
-                            <input type="hidden" id="montotc" name="montotc" value="{{ producto.monto_contribucion_evento }}">
-                            {% else %}
-                            <input type="text" id="montotc" name="montotc" value="">
-                            {% endif %}
-                            <div onclick="sendPaymentTC();return false;" class="btn btn-success"><h3>Concluir Pago</h3></div>
+                                {% if producto.formato_contribucion_evento =='option1' %}
+                                <h2>$ {{ producto.monto_contribucion_evento }}</h2>
+                                 <input type="hidden" id="montotc" name="montotc" value="{{ producto.monto_contribucion_evento }}">
+                                {% else %}
+                                Monto de contribución:<input type="text" id="montotc" name="montotc" value="">
+                                {% endif %}
+                                <div onclick="sendPaymentTC();return false;" class="btn btn-success"><h3>Concluir Pago</h3></div>
                         </div>
                     </div>
                 </form>
             </div>
         </div>
         <div id="tabs-2">
-            <div class="row">
-             <div class="span4 ">
-                    <div class="well">
-                        <h1>Monto a Contribuir</h1>
+            <div class="well">
+                {% if payment_methods['banwireOXXO']==False %}
+                    <div class="alert alert-block">
+                        Estamos trabajando en la implementación de este método de pago, te mantendremos informado. 
+                    </div>        
+                {% endif%}
+                <div id="oxxogenerar">
+                     <form id="datos_pago_oxxo" name="datos_pago_oxxo" method="POST" action="/oxxoformat/" >
+                        <h1>Monto a Contribuir
                         {% if producto.formato_contribucion_evento =='option1' %}
-                        <h2>$ {{ producto.monto_contribucion_evento }}</h2>
+                        $ {{ producto.monto_contribucion_evento }}</h2>
+                         <input type="hidden" id="montooxxo" name="montooxxo" value="{{ producto.monto_contribucion_evento}}">
                         {% else %}
-                        <input id="monto" name="monto" value="">
+                        <input id="montooxxo" name="montooxxo" value="">
                         {% endif %}
-                        <table><tr><td>Correo electrónico</td><td><input id="emailoxxo" name="emailoxxo" value=""></td></table>
-                        
-                        <div  class="btn btn-success"><h3>Generar formato de pago.</h3></div>
+                        </h1>
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="tipo_pago" value="OXXO"/>
+
+                        <input type="hidden" id="oxxo_img_tmp_id"name="oxxo_img_tmp_id" value="{{ producto.temp_id }}">
+                        <button onclick="solicitarOxxo();return false;" class="btn btn-success" ><h3>Generar formato de pago</h3>
+                    </form>
+                </div>
+                <div id="oxxoresultado">
+                </div>
+                <div id="oxxogenerar_de_nuevo" style="display:none" >
+                    <div onclick="generardenuevoOxxo();return false;" class="btn btn-success">
+                        Generar otro formato.
+                    </div>
+                    <div onclick="window.location.href='/';return false;" class="btn btn btn-info">
+                        Terminar
                     </div>
                 </div>
             </div>
@@ -91,15 +150,15 @@
                 </td>
                 <td>
                     <table>
-                        <tr>
+                        <tr><td>Título:</td>
                             <td><h3>{{ producto.titulo_evento }}</h3>
                             </td>
                         </tr>
-                        <tr>
+                        <tr><td>Descripción:</td>
                             <td><i>{{ producto.descripcion_evento }}</i>
                             </td>
                         </tr>
-                        <tr>
+                        <tr><td>Tipo:</td>
                             <td>
                                 {% if producto.tipo_evento== '1' %}
                                     Cumpleaños 
@@ -112,7 +171,7 @@
                                 {% endif %}
                             </td>
                         </tr>
-                        <tr>
+                        <tr><td>Fecha:</td>
                             <td>
                                 {% if producto.fecha_evento|length >0 %}
                                     {{ producto.fecha_evento }}
@@ -121,11 +180,23 @@
                                 {% endif %}
                             </td>
                         </tr>
+                        <tr><td>Meta:</td><td>{{ producto.meta_evento|format_currency_w_money }}</td></tr>
                     </table>
                 </td>
-                <td><div class="progress progress-danger progress-striped active">
-                    <div class="bar" style="width: 100%;">0%</div>
-                    </div></td><td></td></tr>
+                <td>
+                    <div class="progress  progress-striped active">
+                        <div class="bar bar-success" style="width: {{ producto.porcentaje_recolectado|int }}%;">
+                           {% if producto.porcentaje_recolectado > 50 %}
+                                {{ producto.porcentaje_recolectado|int }}%
+                           {% endif %}
+                        </div>
+                        <div class="bar bar-warning" style="width: {{ (100-producto.porcentaje_recolectado)|int }}%;">
+                            {% if producto.porcentaje_recolectado <= 50 %}
+                                {{ producto.porcentaje_recolectado|int }}%
+                            {% endif %}
+                        </div>
+                    </div>
+                </td><td></td></tr>
                 </tbody>
             </table>
         </div>
@@ -146,7 +217,7 @@
     </div>
     <div id="pago_exitoso" style="display:none">
         <p>Su pago se aplicó con éxito</p>
-        <button class="btn btn-primary" data-dismiss="modal" aria-hidden="true">Continuar</button>
+        <button class="btn btn-primary" onclick='window.location.href="/";' data-dismiss="modal" aria-hidden="true">Continuar</button>
     </div>
     <div id="procesando_fallido" style="display:none">
         <p>No se pudo procesar su pago, intente nuevamente o use otro medio.</p>
@@ -156,17 +227,100 @@
   <div class="modal-footer">
   </div>
 </div>
+<div class="modal hide" id="myModalMessage" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-header">
+    <h3 id="myModalMessageLabel">Label</h3>
+  </div>
+  <div class="modal-body">
+    <div style="display:block">
+        <p id="myModalMessageText" >myModalMessageText</p>
+        <button class="btn btn-primary" onclick='return false; ' data-dismiss="modal" >Continuar</button>
+    </div>
+  </div>
+  <div class="modal-footer">
+  </div>
+</div>
 {% endblock %}
 
 {% block mediaJS %}
+<script type="text/javascript" src="https://www.paypalobjects.com/js/external/dg.js"></script>
 <script>
+var dgFlow;
+
+function registerInteraction(value){
+    var url='/registerInteraction/';
+    var data={
+        'module':'boilerplate_pay_event',
+        'value':value
+    }
+    $.ajax({
+          type: 'GET',
+          url: url,
+          data: data,
+          success: function(data){
+            //alert('stored interaction!');
+          },
+          error: function(){
+            //alert('error storing interaction');
+          }
+        });
+}
+function checkPaymentMethod(tipoPago){
+    registerInteraction(tipoPago);
+    {% if test_facebook_ids[email] %}
+        return true;
+    {% else %}
+        showMessage('Estamos trabajando con nuestro proveedor de métodos de pago, te mantendremos informado', 'Métodos de Pago');
+        return false;
+    {% endif %}
+}
+
+function showMessage(texto, titulo){
+    
+    $('#myModalMessageLabel').html(titulo);
+    $('#myModalMessageText').html(texto);
+    $('#myModalMessage').modal('show');
+}
 $(function() {
         $('#datos_pago_tc').ajaxForm();
+        $('#datos_pago_oxxo').ajaxForm();
         $( "#tabs" ).tabs();
         $( "#tabs" ).show();
+        dgFlow = new PAYPAL.apps.DGFlow();
     });
 
+function generardenuevoOxxo(){
+     $('#oxxogenerar').show();
+     $('#oxxoresultado').html('');
+     $('#oxxogenerar_de_nuevo').hide();
+}
+function solicitarOxxo(){
+    if (!checkPaymentMethod('banwireOXXO')){
+        return;
+    }
+    var options={
+        success: function(responseText, statusText, xhr, jqwForm){
+            $('#oxxogenerar').hide();
+            $('#oxxoresultado').html(responseText);
+            $('#oxxogenerar_de_nuevo').show();
+        },
+        error:function(){
+            showMessage('Error generando formato de pago.', 'Pago OXXO');
+        }
+    };
+    $('#datos_pago_oxxo').ajaxSubmit(options);
+}
+function sendPaymentPayPal(){
+    if (!checkPaymentMethod('paypal')){
+        return;
+    }
+    var url='/paypal/?amount=' + $('#montopaypal').val() + '&paypal_event_tmp_id=' + '{{ producto.temp_id }}';
+    dgFlow.startFlow(url);
+}
 function sendPaymentTC(){
+    if (!checkPaymentMethod('banwireTC')){
+        return;
+    }
     $('#procesando_pago').show();
     $('#pago_exitoso').hide();
     $('#procesando_fallido').hide();
@@ -187,6 +341,24 @@ function sendPaymentTC(){
         }
     };
     $('#datos_pago_tc').ajaxSubmit(options);
+}
+
+function setupTestBanwireTCPayment(){
+    $('#nombre').val('Roberto I');
+    $('#paterno').val('Ramirez');
+    $('#materno').val('N');
+    $('#telefono').val('15799155');
+    $('#emailtc').val('jruiz@banwire.com');
+    $('#numero_tarjeta').val('5204164299999999');
+    $('#numero_ccv').val('999');
+    $('#vencimiento').val('11/12');
+    $('#calle').val('Horacio');
+    $('#num_ext').val('');
+    $('#num_int').val('');
+    $('#codigo_postal').val('11560');
+    $('#ciudad').val('');
+    $('#municipio').val('');
+    $('#colonia').val('');
 }
 </script>
 {% endblock %}

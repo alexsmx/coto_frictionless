@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 {% extends base_layout %}
 
 {% block header_title_lead %}{% endblock %}
@@ -17,7 +18,10 @@
         <div class="page-header">
             <h1>Mis Eventos <small>Tus cumpleaños, mesas de regalo y reuniones.</small></h1>
         </div>
-        <div class="btn-group">
+        {% if productos|list|length ==0 %}
+                    <h2>No has agregado eventos! Agrega uno!</h2>
+        {% endif%}
+        <div class="dropdown btn-group">
                 <button class="btn btn-info dropdown-toggle" data-toggle="dropdown">Agregar nuevo evento <span class="caret"></span></button>
                 <ul class="dropdown-menu">
                   <li><a href="{{ uri_for("first-product") }}?tipo=1">Cumpleaños</a></li>
@@ -25,72 +29,122 @@
                   <li><a href="{{ uri_for("first-product") }}?tipo=3">Reunión</a></li>
                 </ul>
               </div>
-
-        <table class="table table-hover">
-            <thead>
-                <tr><th>Nombre</th><th>Tipo de Evento</th><th>Fecha</th><th>Regalo</th><th>Recaudado</th><th>Administrar</th><th>Transferir</th></tr>
-            </thead>
-            <tbody>
-                {% for producto in productos %}
-                    {% if producto.visible is defined and producto.visible==True %}
-                        <tr id="evt{{ producto.getstrkey() }}"><td>{{ producto.titulo_evento }}<br/><i> {{ producto.descripcion_evento }}</i></td><td>
-                            {% if producto.tipo_evento== '1' %}
-                                Cumpleaños {{ producto.visible }}
-                            {% elif producto.tipo_evento=='2' %}
-                                Mesa de Regalos
-                            {% elif producto.tipo_evento=='3' %}
-                                Evento
+        {% if productos|list|length >0 %}
+            <table class="table table-hover">
+                <thead>
+                    <tr><th>Nombre</th><th>Tipo de Evento</th><th>Fecha</th><th>Regalo</th><th>Recaudado</th><th>Administrar</th><th>Transferir</th></tr>
+                </thead>
+                <tbody>
+                    
+                    {% for producto in productos %}
+                        {% if producto.visible is defined and producto.visible==True %}
+                            <tr id="evt{{ producto.getstrkey() }}"><td id="evttitle{{ producto.getstrkey() }}">{{ producto.titulo_evento|safe }}<br/><i id="evtdesc{{ producto.getstrkey() }}"> {{ producto.descripcion_evento }}</i></td><td>
+                                {% if producto.tipo_evento== '1' %}
+                                    Cumpleaños 
+                                {% elif producto.tipo_evento=='2' %}
+                                    Mesa de Regalos
+                                {% elif producto.tipo_evento=='3' %}
+                                    Evento
+                                {% else %}
+                                    Otro
+                                {% endif %}
+                            </td><td>
+                            {% if producto.fecha_evento|length >0 %}
+                                {{ producto.fecha_evento|safe }}
                             {% else %}
-                                Otro
+                                No tiene fecha asignada.
                             {% endif %}
-                        </td><td>
-                        {% if producto.fecha_evento|length >0 %}
-                            {{ producto.fecha_evento }}
-                        {% else %}
-                            No tiene fecha asignada.
-                        {% endif %}
-                        </td><td>
-                            <img src='{{ producto.image_url }}' width="50px" height="50px"/>
-                        </td><td><div class="progress progress-danger progress-striped active">
-                            <div class="bar" style="width: 100%;">0%</div>
+                            </td><td>
+                                <img id="evtimg{{ producto.getstrkey() }}" src='{{ producto.image_url|safe }}' width="50px" height="50px"/>
+                            </td><td>
+                            <div class="progress  progress-striped active">
+                                <div class="bar bar-success" style="width: {{ producto.porcentaje_recolectado|int }}%;">
+                                   {% if producto.porcentaje_recolectado > 50 %}
+                                        {{ producto.porcentaje_recolectado|int }}%
+                                   {% endif %}
+                                </div>
+                                <div class="bar bar-warning" style="width: {{ (100-producto.porcentaje_recolectado)|int }}%;">
+                                    {% if producto.porcentaje_recolectado <= 50 %}
+                                        {{ producto.porcentaje_recolectado|int }}%
+                                    {% endif %}
+                                </div>
+                               
+                               
                             </div></td><td>
-                                <a href="#" title="Configurar">
-                                    <i class="icon-tasks"></i>
-                                </a>
-                                <a href="#" onclick="eliminarItem( {{ producto.getstrkey() }} ); return false; "title="Eliminar" >
-                                    <icon class="icon-trash"></i>
-                                </a>
-                                <a href="#" onclick="publishOnFb({{ producto.getstrkey() }},'{{ producto.gethashkey() }}'; return false; )" title="Publicar en Facebook">
-                                    <i class="icon-share"></i>
-                                </a>
-                                
-                                <a href="http:{{ fb_channel }}participateInEvent/?temp_id={{ producto.temp_id }}" target="_blank" title="Ver página de aportaciones.">
-                                    <i class="icon-eye-open"></i>
-                                </a>
-                        </td><td><button class="btn disabled">Transferir <i class="icon-question-sign"></i></button></td></tr>
-                    {% endif%}
-                {% endfor%}
-              
-            </tbody>
-        </table>
+                                    <a href="/first_product/?img_tmp_id={{ producto.temp_id }}&step=4&action=edit" title="Configurar"><input type="hidden" id="eventoid{{ producto.getstrkey() }}" value="{{ producto.temp_id }}">
+                                        <i class="icon-tasks"></i>
+                                    </a>
+                                    <a href="#" onclick="eliminarItem( {{ producto.getstrkey()|safe }} ); return false; "title="Eliminar" >
+                                        <icon class="icon-trash"></i>
+                                    </a>
+                                    <a href="#" onclick="launchFacebookUI({{ producto.getstrkey()|safe }}); return false; " title="Publicar en Facebook">
+                                        <i class="icon-share"></i>
+                                    </a>
+                                    
+                                    <a href="http:{{ fb_channel }}participateInEvent/?temp_id={{ producto.temp_id|safe }}" target="_blank" title="Ver página de aportaciones.">
+                                        <i class="icon-eye-open"></i>
+                                    </a>
+                            </td><td><button class="btn disabled">Transferir <i class="icon-question-sign"></i></button></td></tr>
+                        {% endif%}
+                        
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif%}
+        {% if prueba|list|length >0 %}
         <div class="page-header">
             <h1>Eventos de Mis Contactos <small>¿Qué está pasando en los próximos días?</small></h1>
         </div>
         <table class="table table-hover">
             <thead>
-                <tr><th>#</th><th>Nombre</th><th>Tipo de Evento</th><th>Fecha</th><th>Regalo</th><th>Recaudado</th></tr>
+                <tr><th>Organizador</th><th>Evento</th><th>Tipo de Evento</th><th>Fecha</th><th>Regalo</th><th>Recaudado</th></tr>
             </thead>
             <tbody>
-                <tr><td>1</td><td>Carlos Pérez</td><td>Cumpleaños</td><td>14 de octubre</td><td><div class="btn btn-warning">Recomiéndale <i class="icon-question-sign"></i></div></td><td><div class="progress progress-danger progress-striped active">
-                <div class="bar" style="width: 100%;">0%</div>
-                </div></td></tr>
-                <tr><td>2</td><td>Verónica Hernandez</td><td>Mesa de Regalos</td><td>20 de noviembre</td><td><div class="btn btn-success">Contribuir <i class="icon-question-sign"></i></div></td><td><div class="progress progress-success progress-striped active">
-                <div class="bar" style="width: 90%;">90%</div>
-                </div></td></tr>
+                {% for pruebaitem in prueba %}
+                <tr>
+                    <td>{{ pruebaitem.nombre_organizador}}</td>
+                    <td>{{ pruebaitem.titulo_evento}} <br/>{{ pruebaitem.descripcion_evento}}</td>
+                    <td>
+                        {% if pruebaitem.tipo_evento== '1' %}
+                                Cumpleaños 
+                        {% elif pruebaitem.tipo_evento=='2' %}
+                            Mesa de Regalos
+                        {% elif pruebaitem.tipo_evento=='3' %}
+                            Evento
+                        {% else %}
+                            Otro
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if pruebaitem.fecha_evento|length >0 %}
+                            {{ pruebaitem.fecha_evento|safe }}
+                        {% else %}
+                            No tiene fecha asignada.
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a class="btn btn-success" href="http:{{ fb_channel }}participateInEvent/?temp_id={{ pruebaitem.temp_id|safe }}" >Contribuir 
+                            <i class="icon-question-sign"></i>
+                        </a></td>
+                    <td>
+                        <div class="progress  progress-striped active">
+                            <div class="bar bar-success" style="width: {{ pruebaitem.porcentaje_recolectado|int }}%;">
+                               {% if pruebaitem.porcentaje_recolectado > 50 %}
+                                    {{ pruebaitem.porcentaje_recolectado|int }}%
+                               {% endif %}
+                            </div>
+                            <div class="bar bar-warning" style="width: {{ (100-pruebaitem.porcentaje_recolectado)|int }}%;">
+                                {% if pruebaitem.porcentaje_recolectado <= 50 %}
+                                    {{ pruebaitem.porcentaje_recolectado|int }}%
+                                {% endif %}
+                            </div>
+                        </div>
+                    </td></tr>
+                {% endfor %}
             </tbody>
         </table>
-        
-    </div>
+        {% endif %}
+        </div>
     <div class="tab-pane " id="tab2" style="height:100%">
       <div id="calendar"></div>
     </div>
@@ -134,6 +188,25 @@
     <input type="hidden" id="event_id" name="event_id" value=""/>
     <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
 </form>
+<div class="modal hide" id="myModalFB" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3 id="myModalLabel">Publicando en Facebook</h3>
+  </div>
+  <div class="modal-body">
+   
+    <div id="procesando_exitosofb">
+        <p>Se publicó en Facebook</p>
+        <button onclick="return false;"class="btn btn-primary" data-dismiss="modal" aria-hidden="true">Continuar</button>
+    </div>
+    <div id="procesando_fallidofb" style="display:none">
+        <p>No se pudo enviar la información a Facebook.</p>
+        <button class="btn btn-primary" data-dismiss="modal" aria-hidden="true">Continuar</button>
+    </div>
+  </div>
+  <div class="modal-footer">
+  </div>
+</div>
 {% endblock %}
 
 
@@ -189,6 +262,57 @@
             var id = setTimeout(function(){
                 $('#calendar').fullCalendar('render');
             }, 1);
+            
+        }
+
+        function launchFacebookUI(eventkey){
+            $('#procesando_fallido').hide();
+            $('#procesando_exitoso').hide();
+            var registrando=0;
+            if (registrando==1){
+                setTimeout('launchFacebookUI()',500);
+                return false;
+            }
+            var local_tmp_product_id= $("#eventoid" + eventkey).val();
+            FB.ui(
+              {
+                method: 'feed',
+                name: 'He publicado un nuevo evento con WishFan',
+                link: 'http:{{ fb_channel }}participateInEvent/?temp_id=' + $("#eventoid" + eventkey).val(),
+                picture: $('#evtimg' + eventkey).attr('src'),
+                caption: $('#evttitle'+ eventkey).html(),
+                description: $('#evtdesc' + eventkey).html()
+              },
+              function(response) {
+                if (response && response.post_id) {
+                    $('#myModalFB').modal('show');
+                    $('#procesando_exitosofb').show();
+                    $('#procesando_fallidofb').hide();
+                    url='/facebookPostSuccess/';
+                    data={
+                            'facebook_post_id': response.post_id , 
+                            'item_temp_id': local_tmp_product_id,
+                            '_csrf_token': '{{ csrf_token() }}'
+                        };
+                    $.ajax({
+                      type: 'POST',
+                      url: url,
+                      data: data,
+                      success: function(data){
+                        //alert('stored facebook post_id!');
+                      },
+                      error: function(){
+                        //alert('error storing facebook post_id');
+                      }
+                    });
+                    
+                } else {
+                    $('#myModalFB').modal('show');
+                    $('#procesando_exitosofb').hide();
+                    $('#procesando_fallidofb').show();
+                }
+              }
+            );
             
         }
     </script>

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 {% import "macros.html" as macros %}
 <!DOCTYPE html xmlns:og="http://ogp.me/ns" xmlns:fb="http://www.facebook.com/2008/fbml" lang="en">
 <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang="{{ locale_language_id }}"> <![endif]-->
@@ -55,7 +56,8 @@
 
     <div id="page">
         {% block navbar %}
-        <div class="navbar navbar-fixed-top">
+        <!-- <div class="navbar navbar-fixed-top"> -->
+        <div class="navbar">
             <div class="navbar-inner">
                 <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
                     <span class="icon-chevron-down icon"></span>
@@ -93,32 +95,34 @@
                                 <form id="form_login_user" action="{{ uri_for("login") }}" method="post" class="auth-at-dropdown">
                                     <fieldset>
                                         {{ macros.federated_login(provider_info, provider_uris, enable_federated_login) }}
-                                        <h4>O tu usuario registrado:</h4>
-                                        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
-                                        <div class="control-group">
-                                            <label class="control-label" for="l_username">{% trans %}Username or Email{% endtrans %}:</label>
-                                            <div class="controls">
-                                                <input class="input-xlarge focused required" id="l_username" name="username" type="text" value="">
+                                        {% if False %}
+                                            <h4>O tu usuario registrado:</h4>
+                                            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                                            <div class="control-group">
+                                                <label class="control-label" for="l_username">{% trans %}Username or Email{% endtrans %}:</label>
+                                                <div class="controls">
+                                                    <input class="input-xlarge focused required" id="l_username" name="username" type="text" value="">
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="control-group">
-                                            <label class="control-label" for="l_password">{% trans %}Password{% endtrans %}:</label>
-                                            <div class="controls">
-                                                <input class="input-xlarge focused required" id="l_password" name="password" type="password" value="">
+                                            <div class="control-group">
+                                                <label class="control-label" for="l_password">{% trans %}Password{% endtrans %}:</label>
+                                                <div class="controls">
+                                                    <input class="input-xlarge focused required" id="l_password" name="password" type="password" value="">
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="control-group row-fluid">
-                                            <label class="checkbox span7">
-                                                <input type="checkbox" name="remember_me" id="remember_me" value="on">
-                                                {% trans %}Remember me?{% endtrans %}
-                                            </label>
-                                            <div class="span5">
-                                                <button type="submit" class="btn btn-primary btn-small btn-login">{% trans %}Login{% endtrans %}</button>
+                                            <div class="control-group row-fluid">
+                                                <label class="checkbox span7">
+                                                    <input type="checkbox" name="remember_me" id="remember_me" value="on">
+                                                    {% trans %}Remember me?{% endtrans %}
+                                                </label>
+                                                <div class="span5">
+                                                    <button type="submit" class="btn btn-primary btn-small btn-login">{% trans %}Login{% endtrans %}</button>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="control-group">
-                                            <a href="{{ uri_for("password-reset") }}">{% trans %}Forgot your password?{% endtrans %}</a>
-                                        </div>
+                                            <div class="control-group">
+                                                <a href="{{ uri_for("password-reset") }}">{% trans %}Forgot your password?{% endtrans %}</a>
+                                            </div>
+                                        {% endif %}
                                     </fieldset>
                                 </form>
                             </div>
@@ -159,6 +163,64 @@
     <!-- JavaScript at the bottom for fast page loading -->
     <!-- Grab Google CDN's jQuery, with a protocol relative URL; fall back to local if offline -->
     <script>
+    function authUser() {
+      FB.Event.subscribe('auth.statusChange', function(session) {
+        console.log('Got the user\'s session: ', session);
+        
+        if (session && session.status != 'not_authorized') {
+          if (session.authResponse['accessToken']) {
+            document.body.className = 'connected';
+            
+            //Fetch user's id, name, and picture
+            FB.api('/me', {
+              fields: 'name, picture'
+            },
+            function(response) {
+              if (!response.error) {
+                user = response;
+                
+                console.log('Got the user\'s name and picture: ', response);
+                
+                //Update display of user name and picture
+                if (document.getElementById('user-name')) {
+                  var strnombre=user.name;
+                  strnombre=String(strnombre);
+                  strmensaje= '¿No eres ' + strnombre + '? (<a onclick="fblogout();return false;"/>Logout';
+                  strmensaje= strmensaje + '</a>)';
+
+                  strmensaje=strmensaje + ''
+                  document.getElementById('user-name').innerHTML = strmensaje;
+                }
+                if (document.getElementById('user-picture')) {
+                  document.getElementById('user-picture').src = user.picture.data.url;
+                }
+              }
+              
+              //clearAction();
+            });
+          }
+        }
+        else if (session === undefined) {
+          document.body.className = 'not_connected';
+        
+          //clearAction();
+        }
+        else if (session && session.status == 'not_authorized') {
+          document.body.className = 'not_connected';
+          
+          //clearAction();
+        }
+      });
+    }
+
+    function fblogout() {
+      FB.logout(function(response) {
+        //window.location.reload();
+      });
+    }
+
+    </script>
+    <script>
     //Facebook loading script
       window.fbAsyncInit = function() {
         // init the FB JS SDK
@@ -174,7 +236,7 @@
         });
 
         // Additional initialization code such as adding Event Listeners goes here
-
+        authUser();
       };
 
       // Load the SDK's source Asynchronously
@@ -190,6 +252,9 @@
     <script>window.jQuery || document.write('<script src="/js/libs/jquery-1.8.0.min.js"><\/script>')</script>
     <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.23/jquery-ui.min.js"></script>
     <script src="/boilerplate/js/libs/bootstrap.min.js"></script>
+    <script>
+        $('body').on('touchstart.dropdown', '.dropdown-menu', function (e) { e.stopPropagation(); });
+    </script>
     <script src="/js/libs/jquery.masonry.min.js"></script>
     <script src="/js/libs/jquery.form.js"></script>
     <script src="/js/libs/fullcalendar.js"></script>
@@ -201,6 +266,7 @@
     <script src="/js/script.js"></script>
     {% if locale_language_id != "en" %}
     <script src="/boilerplate/js/libs/jquery_validation/localization/messages_{{ locale_language_id }}.js"></script>
+    
     
     {% endif %}
     {% block mediaJS %}{% endblock %}

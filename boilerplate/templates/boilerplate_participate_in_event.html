@@ -1,4 +1,4 @@
-{% extends base_layout %}
+<?xml version="1.0" encoding="utf-8"?>{% extends base_layout %}
 
 {% block title %}
         {% trans %}Evento{% endtrans %} - {{app_name}}
@@ -20,16 +20,17 @@
         </td>
         <td>
             <table>
+                <tr><td>Organizador:</td><td>{{ producto.nombre_organizador }}</td></tr>
                 <tr>
-                    <td><h3>{{ producto.titulo_evento }}</h3>
+                    <td colspan="2" align="center"><h2>{{ producto.titulo_evento }}</h2>
                     </td>
                 </tr>
                 <tr>
-                    <td><i>{{ producto.descripcion_evento }}</i>
+                    <td colspan="2" align="center"><h2><i>{{ producto.descripcion_evento }}</i></h2>
                     </td>
                 </tr>
                 <tr>
-                    <td>
+                    <td colspan="2">
                         {% if producto.tipo_evento== '1' %}
                             Cumpleaños 
                         {% elif producto.tipo_evento=='2' %}
@@ -42,6 +43,7 @@
                     </td>
                 </tr>
                 <tr>
+                    <td>Fecha:</td>
                     <td>
                         {% if producto.fecha_evento|length >0 %}
                             {{ producto.fecha_evento }}
@@ -50,12 +52,14 @@
                         {% endif %}
                     </td>
                 </tr>
+                <tr><td>Meta:</td><td>{{ producto.meta_evento|format_currency_w_money }}</td></tr>
                 <tr>
+                    <td>Tipo de Contribución:</td>
                     <td>
                         {% if producto.formato_contribucion_evento=='option1' %}
-                            Monto fijo: $ {{ producto.monto_contribucion_evento }}
+                            Monto fijo:  {{ producto.monto_contribucion_evento|format_currency_w_money }}
                         {% elif producto.formato_contribucion_evento=='option2' %}
-                            Monto mínimo: $ {{ producto.monto_contribucion_evento }}
+                            Monto mínimo:  {{ producto.monto_contribucion_evento|format_currency_w_money }}
                         {% elif producto.formato_contribucion_evento=='option3' %}
                             Cualquier monto. 
                         {% else %}
@@ -64,9 +68,22 @@
                 </tr>
             </table>
         </td>
-        <td><div class="progress progress-danger progress-striped active">
-            <div class="bar" style="width: 100%;">0%</div>
-            </div></td><td></td></tr>
+        <td>
+            <div class="progress  progress-striped active">
+                <div class="bar bar-success" style="width: {{ producto.porcentaje_recolectado|int }}%;">
+                   {% if producto.porcentaje_recolectado > 50 %}
+                        {{ producto.porcentaje_recolectado|int }}%
+                   {% endif %}
+                </div>
+                <div class="bar bar-warning" style="width: {{ (100-producto.porcentaje_recolectado)|int }}%;">
+                    {% if producto.porcentaje_recolectado <= 50 %}
+                        {{ producto.porcentaje_recolectado|int }}%
+                    {% endif %}
+                </div>
+               
+               
+            </div>
+        </td><td></td></tr>
              <tr><td ></td><td></td><td>
                 {% if producto.visible==True %}
                     <div class="btn btn-success" onclick="
@@ -92,8 +109,9 @@
         <div class="row">
             <div class="span5">
                 <h4>Puedes utilizar Facebook</h4>
-                <a href="/social_login/facebook?img_tmp_id={{ tmp_producto_id }}&process_name=pagoparticipacion">Facebook Login Image</a>
+                <a href="/social_login/facebook?img_tmp_id={{ tmp_producto_id }}&process_name=pagoparticipacion"><img src="/img/fb_connect.png"></a>
             </div>
+            {% if False %}
             <div class="span5">
                 <h4>También puedes registrar tus datos, si no tienes o no quieres usar Facebook</h4>
                 <form id="form_register" action="{{ url|safe }}" method="post" class="well form-horizontal">
@@ -114,6 +132,7 @@
                     </fieldset>
                 </form>
             </div>
+            {% endif %}
         </div>  
     </div>
 </div>

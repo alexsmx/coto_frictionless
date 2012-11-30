@@ -14,7 +14,8 @@ import re
 import json
 import uuid
 import urllib
-import simplejson
+
+import base64
 
 # related third party imports
 import webapp2
@@ -23,6 +24,7 @@ from webapp2_extras import security
 from webapp2_extras.auth import InvalidAuthIdError, InvalidPasswordError
 from webapp2_extras.i18n import gettext as _
 from webapp2_extras.appengine.auth.models import Unique
+from lib import simplejson
 from google.appengine.ext import blobstore
 from google.appengine.ext.webapp import blobstore_handlers
 from google.appengine.api import images
@@ -35,9 +37,11 @@ import config, models
 import forms as forms
 
 from lib import utils, captcha, twitter
+from lib.paypal import PaypalAdaptivePayment
 from lib.basehandler import BaseHandler
 from lib.basehandler import user_required
 from lib import facebook
+
 
 
 class RegisterBaseHandler(BaseHandler):
@@ -384,8 +388,14 @@ class CallbackSocialLoginHandler(BaseHandler):
             token_expires= long(token['expires'])
             fb = facebook.GraphAPI(access_token)
             user_data = fb.get_object('me')
-            profile_picture=fb.get_object('me/picture')
-            logging.info(profile_picture['url'])
+            profile_picture=''
+            try:
+                profile_picture_obj=fb.get_object('me/picture')
+                profile_picture=profile_picture_obj['url']
+            except Exception as e: 
+                profile_picture=''
+
+            logging.info(profile_picture)
             #this is checking if you're already logged in , maybe with a registered user
             #cause if your are, then all you have to do is an association with that already 
             #registered user.
@@ -403,7 +413,7 @@ class CallbackSocialLoginHandler(BaseHandler):
                         extra_data = user_data,
                         auth_token=access_token,
                         expires=token_expires,
-                        profile_picture_url=profile_picture['url']
+                        profile_picture_url=profile_picture
                     )
                     social_user.put()
 
@@ -518,7 +528,7 @@ class CallbackSocialLoginHandler(BaseHandler):
                                         extra_data = fb_data,
                                         auth_token=access_token,
                                         expires=token_expires,
-                                        profile_picture_url=profile_picture['url']
+                                        profile_picture_url=profile_picture
                                     )
                                     social_user.put()
                             message = _('Welcome %s, you are now logged in.' % '<strong>{0:>s}</strong>'.format(fb_username) )
@@ -1510,9 +1520,20 @@ class HomeRequestHandler(RegisterBaseHandler):
             params = {}
             params={}
             user_info = models.User.get_by_id(long(self.user_id))
+            if user_info:
+                pass
+            else:
+                return self.render_template('boilerplate_home.html', **params) 
+
             productos=models.ItemEvent.query(models.ItemEvent.user==user_info.key, models.ItemEvent.visible==True)
-            payload=dict(productos=productos)
-            params=payload
+            list_of_entities = models.ndb.get_multi(user_info.events)
+            
+            params['productos']=productos
+            params['prueba']=list_of_entities
+            logging.info('list_of_entities:')
+            logging.info(list_of_entities)
+            #for producto in poductos:
+            #    logging.info('hashproblem:%s' % producto.gethashkey())
             return self.render_template('boilerplate_private_products.html', **params)
         else:
             params = {}
@@ -1523,11 +1544,14 @@ class HomeRequestHandler(RegisterBaseHandler):
 class FirstProductHandler(RegisterBaseHandler):
     def get(self):
         tipo = self.request.GET.get('tipo')
+        action=''
+        action=self.request.GET.get('action')
         img_tmp_id=''
         paso=''
         tmp_producto_id = uuid.uuid1()
         params={}
         params['tipo']=tipo
+        params['action']=action
         if self.request.GET.get('step'):
             paso=self.request.GET.get('step')
             params['paso']=paso
@@ -1608,19 +1632,23 @@ class PostEvent(BaseHandler):
         simage_url=self.request.get("image_url")
         logging.info('stemp_id=%s' % stemp_id)
         saved_event=models.ItemEvent.query(models.ItemEvent.temp_id==stemp_id).get()
+        snombre_usuario=''
         if saved_event:
             logging.info('saved_event exists')
             if suser!='':
                 user_info = models.User.get_by_id(long(self.user_id))
                 saved_event.user=user_info.key
+                snombre_usuario=user_info.name 
             saved_event.tipo_evento=stipo_evento
             saved_event.fecha_evento=sfecha_evento
             saved_event.titulo_evento=stitulo_evento
-            saved_event.descripcion=sdescripcion
+            saved_event.descripcion_evento=sdescripcion
             saved_event.meta_evento=smeta_evento
             saved_event.formato_contribucion_evento=sformato_contribucion_evento
             saved_event.monto_contribucion_evento=smonto_contribucion_evento
             saved_event.image_url=simage_url
+            if snombre_usuario.strip() !='':
+                saved_event.nombre_organizador=snombre_usuario
             try:
                 saved_event.put()
             except Exception as e:
@@ -1629,11 +1657,14 @@ class PostEvent(BaseHandler):
             logging.info('saved_event dont exists')
             if suser!='':
                 user_info = models.User.get_by_id(long(self.user_id))
+                snombre_usuario=user_info.name 
                 nuevoEvento=models.ItemEvent(user=user_info.key, temp_id=stemp_id, tipo_evento=stipo_evento, fecha_evento=sfecha_evento, 
                     titulo_evento=stitulo_evento, descripcion_evento=sdescripcion, meta_evento=smeta_evento, 
                     formato_contribucion_evento=sformato_contribucion_evento, monto_contribucion_evento=smonto_contribucion_evento,
                     image_url=simage_url
                     )
+                if snombre_usuario.strip()!='':
+                    nuevoEvento.nombre_organizador=snombre_usuario
             else:
                 nuevoEvento=models.ItemEvent(temp_id=stemp_id, tipo_evento=stipo_evento, fecha_evento=sfecha_evento, 
                     titulo_evento=stitulo_evento, descripcion_evento=sdescripcion, meta_evento=smeta_evento, 
@@ -1666,11 +1697,24 @@ class DeleteEvent(BaseHandler):
 class ParticipateHandler(RegisterBaseHandler):
     def get(self):
         sevent_temp_id=self.request.GET.get("temp_id")
+        #this was intended to check the request came from a site generated place
         #shash_event= self.request.GET.get("h")
-        #sevent_hash_check=utils.hashing(sevent_id, config.salt)
+        #sevent_hash_check=utils.hashing(sevent_id, config.salt) 
         if sevent_temp_id and sevent_temp_id!='' :
             event_to_show=models.ItemEvent.query(models.ItemEvent.temp_id==sevent_temp_id).get()
             if event_to_show:
+                #we are going to check if a user is logged in and if it is, we are going to 
+                #add this event as a reference, only if the event is not his
+                if self.user:
+                    user_info = models.User.get_by_id(long(self.user_id))
+                    logging.info(event_to_show.user)
+                    logging.info(user_info.key)
+                    if event_to_show.user != user_info.key:
+                        if event_to_show.key in user_info.events:
+                            pass
+                        else:
+                            user_info.events.append(event_to_show.key)
+                            user_info.put()
                 params={}
                 params['producto']=event_to_show
                 params['tmp_producto_id']=sevent_temp_id
@@ -1684,8 +1728,14 @@ class PaymentHandler(BaseHandler):
     @user_required
     def get(self):
         sevent_temp_id=self.request.GET.get("img_tmp_id")
+        user_info = models.User.get_by_id(long(self.user_id))
         if sevent_temp_id and sevent_temp_id!='' :
             event_to_show=models.ItemEvent.query(models.ItemEvent.temp_id==sevent_temp_id).get()
+            if event_to_show.key in user_info.events:
+                pass
+            else:
+                user_info.events.append(event_to_show.key)
+                user_info.put()
             if event_to_show:
                 params={}
                 params['producto']=event_to_show
@@ -1705,6 +1755,8 @@ class PaymentHandler(BaseHandler):
     """
     @user_required
     def post(self):
+        sevent_temp_id=self.request.POST.get("tc_img_tmp_id")
+        logging.info('sevent_temp_id_pago= %s' % sevent_temp_id)
         surl =  "http://banwire.com/api.pago_pro"
         #surl =  "http://posttestserver.com/post.php"
         #we have to collect the necessary info from the client
@@ -1778,18 +1830,72 @@ class PaymentHandler(BaseHandler):
         #sheaders={}
         result = urlfetch.fetch(url=surl, payload=form_data ,method=urlfetch.POST,  allow_truncated=False, follow_redirects=True, deadline=60, validate_certificate=None)
         #self.response.out.write(' Resultado: %s' % result.content)
+        confirmaPagoTC=models.ConfirmPagoTC(parametros=result.content)
+        confirmaPagoTC.put()
         resultado=json.loads(result.content)
-        r_user=resultado['user']
-        r_id=resultado['id']
-        r_referencia=resultado['referencia']
-        r_date=resultado['date']
-        r_card=resultado['card']
-        r_response=resultado['response']
-        r_code_auth=resultado['code_auth']
-        r_monto=resultado['monto']
-        r_client=resultado['client']
+        r_user=''
+        r_id=''
+        r_referencia=''
+        r_date=''
+        r_card=''
+        r_response=''
+        r_code_auth=''
+        r_monto=''
+        r_client=''
+        r_user=str(resultado['user'])
+        r_id=str(resultado['id'])
+        r_referencia=str(resultado['referencia'])
+        r_date=str(resultado['date'])
+        r_card=str(resultado['card'])
+        r_response=str(resultado['response'])
+        r_code_auth=str(resultado['code_auth'])
+        r_monto=str(resultado['monto'])
+        r_client=str(resultado['client'])
+        if r_response.upper()=='OK':
+            try:
+                user_info = models.User.get_by_id(long(self.user_id))
+                social_user_info = models.SocialUser.get_by_user(user_info.key)
+                logging.info('user_info:%s', user_info.key)
+                nombre_usuario= user_info.name + ' ' + user_info.last_name
+                imagen_usuario=''
+                for usuario_social in social_user_info:
+                    if usuario_social.profile_picture_url:
+                        imagen_usuario=usuario_social.profile_picture_url
+                    else:
+                        imagen_usuario=''
+
+                item_info = models.ItemEvent.query(models.ItemEvent.temp_id==sevent_temp_id).get()
+                logging.info('item_info:%s', item_info.key)
+                dbPago=models.PagoTC(user=user_info.key, evento= item_info.key, bwuser=r_user, bwid=r_id, bwreferencia=r_referencia, 
+                    bwdate=r_date, bwcard=r_card, bwresponse=r_response, bwcode_auth=r_code_auth, bwmonto= r_monto, bwclient=r_client )
+                dbPago.put()
+                if nombre_usuario.strip()!='':
+                    item_info.participantes.append(nombre_usuario)
+                    if imagen_usuario.strip()!='':
+                        item_info.imagenes_participantes.append(imagen_usuario)
+                    else:
+                        item_info.imagenes_participantes.append('')
+                if item_info.recolectado:
+                    recolectado= float(item_info.recolectado)
+                else:
+                    recolectado=0
+                recolectado=recolectado + float(r_monto)
+                if item_info.meta_evento:
+                    meta= float(item_info.meta_evento)
+                else:
+                    meta=0
+                item_info.recolectado=recolectado
+                if meta>0:
+                    item_info.porcentaje_recolectado= recolectado *100 / meta
+                else:
+                    item_info.porcentaje_recolectado= 100
+
+                item_info.put()    
+            except Exception as e:
+                logging.error("error storing payment %s" % e)
+                importantErr=models.ImportantErrors(error=e, module="payment successfull")
+                importantErr.put()
         self.response.out.write(r_response)
-        
 
 class confirmacionOxxo(BaseHandler):
     def get(self):
@@ -1838,3 +1944,215 @@ class imagenOxxo(BaseHandler):
         imagen= PagoOxxo.get_by_id(int(id))
         self.response.headers['Content-Type'] = 'image/png'
         self.response.out.write(imagen.resp_bc_img)
+
+class OxxoFormatHandler(BaseHandler):
+    @user_required
+    def post(self):
+        sevent_temp_id=self.request.POST.get("oxxo_img_tmp_id")
+        logging.info('oxxo_sevent_temp_id: %s' % sevent_temp_id)
+        if sevent_temp_id and sevent_temp_id=='' :
+            return self.redirect_to('home')
+
+        surl="https://www.banwire.com/api.oxxo"
+        smonto=''
+        smonto= self.request.POST.get('montooxxo')
+        smail=''
+        #smail=self.request.POST.get('emailoxxo')
+        #smail=smail.strip()
+        user_info = models.User.get_by_id(long(self.user_id))
+        nombre_usuario = user_info.name + ' ' +  user_info.last_name
+        sendPDF=False
+        if smail !='':
+            sendPDF=True
+        strreferencia=sevent_temp_id + '_' + self.user_id
+        params_oxxo= {
+            'usuario' : 'desarrollo', 
+            'referencia': strreferencia,
+            'dias_vigencia' : 3,
+            'monto' : smonto,
+            'url_respuesta' : 'http://wishfan.com/confirmacionPago/', 
+            'cliente'      :  nombre_usuario, 
+            'formato'     :  'JSON',
+            'sendPDF'     :True,
+            'email'      :  'alexsmx@gmail.com'
+        }
+        form_data = urllib.urlencode(params_oxxo)
+        result = urlfetch.fetch(url=surl, payload=form_data ,method=urlfetch.POST,  allow_truncated=False, follow_redirects=True, deadline=60, validate_certificate=None)
+        response_pago = simplejson.loads(result.content)
+        if response_pago["error"]==False:
+            barcode_img=response_pago["response"]["barcode_img"]
+            barcode= response_pago["response"]["barcode"]
+            referencia = response_pago["response"]["referencia"]
+            fecha_vigencia= response_pago["response"]["fecha_vigencia"]
+            monto=  response_pago["response"]["monto"]
+            pagooxodb= models.PagoOxxo(
+                resp_cb= barcode,
+                resp_referencia= referencia,
+                resp_fecha_vigencia= fecha_vigencia,
+                resp_monto= monto,
+                resp_bc_img=base64.b64decode(barcode_img)
+                )
+            pagooxodb.put()
+            params={}
+            params['referencia']=referencia
+            params['fechavigencia']=fecha_vigencia
+            params['monto']=monto
+            params['nombre_usuario']=nombre_usuario
+            params['email']=smail
+            pagoid=str(pagooxodb.key.id())
+            params['pago_id']=pagoid
+            params['monto']=monto
+            event_to_show=models.ItemEvent.query(models.ItemEvent.temp_id==sevent_temp_id).get()
+            if event_to_show:
+                params['producto']=event_to_show
+                return self.render_template('boilerplate_oxxo_formato_pago.html', **params)
+            else:
+                return self.redirect_to('home')    
+                
+class ConfirmacionPago(BaseHandler):
+    def get(self):
+        jresult= json.dumps(self.request.GET.items())
+        registraConfirmacion=models.ConfirmPagoOxxo(parametros=jresult)
+        registraConfirmacion.put()
+        
+    def post(self):
+        jresult= json.dumps(self.request.POST.items())
+        registraConfirmacion=models.ConfirmPagoOxxo(parametros=jresult)
+        registraConfirmacion.put()
+
+class imagenOxxo(BaseHandler):
+    def get(self):
+        id=self.request.GET.get("id")
+        logging.info("Id: %s" % id)
+        imagen= models.PagoOxxo.get_by_id(int(id))
+        self.response.headers['Content-Type'] = 'image/png'
+        self.response.out.write(imagen.resp_bc_img)
+
+class paypalHandler(BaseHandler):
+    @user_required
+    def get(self):
+        amount=0
+        paypal_event_tmp_id=''
+        if self.request.GET.get("amount") and self.request.get("paypal_event_tmp_id") :
+            amount=self.request.GET.get("amount")
+            paypal_event_tmp_id=self.request.GET.get("paypal_event_tmp_id")
+            user_info = models.User.get_by_id(long(self.user_id))
+            event_info=models.ItemEvent.query(models.ItemEvent.temp_id==paypal_event_tmp_id).get()
+            logging.info(amount)
+            paypal_init = PaypalAdaptivePayment(True)
+            url_error="http:" +  config.fb_channel + 'paypalcancel/'
+            logging.info(url_error)
+            url_success="http:" + config.fb_channel + 'paypalsuccess/'
+            logging.info(url_success)
+            response = paypal_init.initialize_payment(amount,url_error,url_success)
+            logging.info(response)
+            if response:
+                payKey= response['payKey']
+            else:
+                return self.redirect(self.uri_for('paypalcancel'))
+            paypalRequest=models.PayPalRequest(paypalResponseString=str(response), paypalKey=payKey, user=user_info.key,
+                evento=event_info.key, amount= amount)
+            paypalRequest.put()
+            self.session['PPPayKey']=payKey
+            redirect_url=str('https://www.sandbox.paypal.com/webapps/adaptivepayment/flow/pay?expType=light&paykey=' +  payKey)
+            self.redirect(redirect_url)
+        else:
+            pass
+        #self.response.out.write(response['payKey'])
+
+class paypalCancelHandler(BaseHandler):
+    def get(self):
+        params={}
+        self.render_template('paypalerror.html', **params)
+
+class paypalSuccessHandler(BaseHandler):
+    def get(self):
+        params={}
+        payKey=self.session['PPPayKey']
+        if payKey.strip() !='':
+            paypal_init = PaypalAdaptivePayment(True)
+            response = paypal_init.check_payment_status(payKey)
+            #aqui vamos a actualizar la bd confirmando el pago
+            storedKey = models.PayPalRequest.query(models.PayPalRequest.paypalKey==payKey).get()
+            if storedKey:
+                storedKey.confirmedPayResponseString=str(response)
+                status=response['status']
+                storedKey.confirmedPay=status
+                storedKey.put()
+                if status=="COMPLETED":
+                    r_monto= storedKey.amount
+                    item_info = models.ItemEvent.get_by_id(storedKey.evento.id())
+                    user_info = models.User.get_by_id(storedKey.user.id())
+                    social_user_info = models.SocialUser.get_by_user(user_info.key)
+                    nombre_usuario= user_info.name + ' ' + user_info.last_name
+                    imagen_usuario=''
+                    for usuario_social in social_user_info:
+                        if usuario_social.profile_picture_url:
+                            imagen_usuario=usuario_social.profile_picture_url
+                        else:
+                            imagen_usuario=''
+
+                    if nombre_usuario.strip()!='':
+                        item_info.participantes.append(nombre_usuario)
+                    if imagen_usuario.strip()!='':
+                        item_info.imagenes_participantes.append(imagen_usuario)
+                    else:
+                        item_info.imagenes_participantes.append('')
+
+                    if item_info.recolectado:
+                        recolectado= float(item_info.recolectado)
+                    else:
+                        recolectado=0
+                    recolectado=recolectado + float(r_monto)
+                    if item_info.meta_evento:
+                        meta= float(item_info.meta_evento)
+                    else:
+                        meta=0
+                    item_info.recolectado=recolectado
+                    if meta>0:
+                        item_info.porcentaje_recolectado= recolectado *100 / meta
+                    else:
+                        item_info.porcentaje_recolectado= 100
+
+                    item_info.put()   
+                else:
+                    #no se completó el pago?! hay que registrar el error para revisarlo.
+                    pass
+            else:
+                #no encontraste la llave? hay que registrar el error para revisarlo.
+                pass
+        params['paykey']=payKey
+
+        self.render_template('paypalsuccess.html', **params)
+        #return self.render_template('paypalsuccess.html', **params)
+
+class facebookPostSuccess(BaseHandler):
+    @user_required
+    def post(self):
+        item_id=''
+        post_id=''
+        post_id=self.request.POST.get('facebook_post_id')
+        item_id=self.request.POST.get('item_temp_id')
+        if item_id !='':
+            item=models.ItemEvent.query(models.ItemEvent.temp_id==item_id).get()
+            if item:
+                item.facebook_post_ids.append(post_id)
+                item.put()
+            else:
+                #facebook post without item? log error
+                pass
+        else:
+            #facebook post without item? log error
+            pass
+
+
+class registerInteraction(BaseHandler):
+    def get(self):
+        jresult= json.dumps(self.request.GET.items() )+ ' | ' + self.request.remote_addr + ' | ' + str(self.request.headers )+ ' | ' + str(self.request.cookies)
+        registraConfirmacion=models.registerInteraction(parametros=jresult)
+        registraConfirmacion.put()
+
+    def post(self):
+        jresult= json.dumps(self.request.POST.items()) + ' | ' + self.request.remote_addr + ' | ' + str(self.request.headers )+ ' | ' + str(self.request.cookies)
+        registraConfirmacion=models.registerInteraction(parametros=jresult)
+        registraConfirmacion.put()

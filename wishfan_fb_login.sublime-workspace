@@ -4,6 +4,206 @@
 		"selected_items":
 		[
 			[
+				"Strg",
+				"StringProperty"
+			],
+			[
+				"ball",
+				"balloonTip"
+			],
+			[
+				"snom",
+				"snombre_usuario"
+			],
+			[
+				"snombre",
+				"snombre_usuario"
+			],
+			[
+				"paypal",
+				"paypal_secure_user_id"
+			],
+			[
+				"auto",
+				"auto_now"
+			],
+			[
+				"redire",
+				"redirect_url"
+			],
+			[
+				"social",
+				"social_user_info"
+			],
+			[
+				"import",
+				"importantErr"
+			],
+			[
+				"profi",
+				"profile_picture_obj"
+			],
+			[
+				"sevent",
+				"sevent_temp_id_pago"
+			],
+			[
+				"remove",
+				"removenumericcomma"
+			],
+			[
+				"errormontomi",
+				"errormontominimonumerica"
+			],
+			[
+				"errormontom",
+				"errormontominimo"
+			],
+			[
+				"errormontofij",
+				"errormontofijonumerica"
+			],
+			[
+				"monto",
+				"montofijo"
+			],
+			[
+				"oxxo",
+				"oxxogenerar_de_nuevo"
+			],
+			[
+				"nombre",
+				"nombre_usuario"
+			],
+			[
+				"proc",
+				"procesando_fallido"
+			],
+			[
+				"proce",
+				"procesando_pago"
+			],
+			[
+				"pago",
+				"pago_exitoso"
+			],
+			[
+				"simple",
+				"simplejson"
+			],
+			[
+				"snum",
+				"snum_ext"
+			],
+			[
+				"email",
+				"emailtc"
+			],
+			[
+				"pro",
+				"profile_picture"
+			],
+			[
+				"user",
+				"user_required"
+			],
+			[
+				"part",
+				"pagoparticipacion"
+			],
+			[
+				"pay",
+				"pay_for_event"
+			],
+			[
+				"Regi",
+				"RegisterBaseHandler"
+			],
+			[
+				"process",
+				"process_name"
+			],
+			[
+				"saved",
+				"saved_item"
+			],
+			[
+				"sf",
+				"sformato_contribucion_evento"
+			],
+			[
+				"temp",
+				"temp_id"
+			],
+			[
+				"event",
+				"event_to_show"
+			],
+			[
+				"False",
+				"false"
+			],
+			[
+				"sim",
+				"simage_url"
+			],
+			[
+				"img",
+				"img_tmp_id"
+			],
+			[
+				"format",
+				"formato_contribucion_evento"
+			],
+			[
+				"image",
+				"image_url"
+			],
+			[
+				"regis",
+				"registrarUsuario"
+			],
+			[
+				"forma",
+				"formato_contribucion_evento"
+			],
+			[
+				"meta",
+				"meta_evento"
+			],
+			[
+				"titulo",
+				"titulo_evento"
+			],
+			[
+				"fecha",
+				"fecha_evento"
+			],
+			[
+				"tipo",
+				"tipo_evento"
+			],
+			[
+				"redirect",
+				"redirect_params"
+			],
+			[
+				"redi",
+				"redirect_params"
+			],
+			[
+				"element",
+				"elementos_x_pagina"
+			],
+			[
+				"elemen",
+				"elementos_x_pagina"
+			],
+			[
+				"test",
+				"testNDBModel"
+			],
+			[
 				"facebook",
 				"facebookuser"
 			],
@@ -36,10 +236,6 @@
 				"email2"
 			],
 			[
-				"user",
-				"username2"
-			],
-			[
 				"last",
 				"last_name2"
 			],
@@ -54,14 +250,6 @@
 			[
 				"las",
 				"last_name"
-			],
-			[
-				"monto",
-				"monto_formato"
-			],
-			[
-				"format",
-				"formato"
 			],
 			[
 				"Time",
@@ -84,26 +272,18 @@
 				"fb_appid"
 			],
 			[
-				"redirect",
-				"redirect_to"
-			],
-			[
 				"rememb",
 				"remember_me"
-			],
-			[
-				"redire",
-				"redirect_to"
 			]
 		]
 	},
 	"buffers":
 	[
 		{
-			"file": "app.yaml",
+			"file": "boilerplate/handlers.py",
 			"settings":
 			{
-				"buffer_size": 2037,
+				"buffer_size": 95016,
 				"line_ending": "Unix"
 			}
 		}
@@ -111,7 +291,7 @@
 	"build_system": "",
 	"command_palette":
 	{
-		"height": 87.0,
+		"height": 267.0,
 		"selected_items":
 		[
 			[
@@ -123,7 +303,7 @@
 	},
 	"console":
 	{
-		"height": 0.0
+		"height": 299.0
 	},
 	"distraction_free":
 	{
@@ -136,6 +316,53 @@
 	},
 	"file_history":
 	[
+		"/Users/alexs_mx/git/wishfan_fb_login/boilerplate/models.py",
+		"/Users/alexs_mx/git/wishfan_fb_login/boilerplate/handlers.py",
+		"/Users/alexs_mx/git/wishfan_fb_login/boilerplate/lib/basehandler.py",
+		"/Users/alexs_mx/git/wishfan_fb_login/boilerplate/templates/boilerplate_base.html",
+		"/Users/alexs_mx/git/wishfan_fb_login/boilerplate/templates/boilerplate_private_products.html",
+		"/Users/alexs_mx/git/wishfan_fb_login/boilerplate/templates/boilerplate_first_product.html",
+		"/Users/alexs_mx/git/wishfan_fb_login/boilerplate/templates/boilerplate_pay_event.html",
+		"/Users/alexs_mx/git/wishfan_fb_login/boilerplate/routes.py",
+		"/Users/alexs_mx/git/wishfan_fb_login/boilerplate/templates/boilerplate_home.html",
+		"/Users/alexs_mx/git/wishfan_fb_login/boilerplate/static/css/boilerplate.min.css",
+		"/Users/alexs_mx/git/wishfan_fb_login/boilerplate/templates/boilerplate_participate_in_event.html",
+		"/Users/alexs_mx/Library/Application Support/Sublime Text 2/Packages/User/Preferences.sublime-settings",
+		"/Users/alexs_mx/git/wishfan_fb_login/boilerplate/config.py",
+		"/Users/alexs_mx/git/wishfan_fb_login/boilerplate/mycustfilters.py",
+		"/Users/alexs_mx/git/wishfan_fb_login/boilerplate/lib/paypal.py",
+		"/Users/alexs_mx/git/wishfan_fb_login/main.py",
+		"/Users/alexs_mx/git/wishfan_fb_login/boilerplate/templates/paypalsuccess.html",
+		"/Users/alexs_mx/git/wishfan_fb_login/boilerplate/templates/paypalerror.html",
+		"/Users/alexs_mx/git/wishfan_fb_login/boilerplate/templates/test.html",
+		"/Users/alexs_mx/git/wishfan_fb_login/boilerplate/templates/macros.html",
+		"/Users/alexs_mx/git/wishfan_fb_login/boilerplate/lib/facebook.py",
+		"/Users/alexs_mx/git/wishfan_fb_login/boilerplate/lib/utils.py",
+		"/Users/alexs_mx/git/wishfan_fb_login/boilerplate/templates/boilerplate_private_productsold.html",
+		"/Users/alexs_mx/git/wishfan_fb_login/app.yaml",
+		"/Users/alexs_mx/git/wishfan_fb_login/appengine_config.py",
+		"/Users/alexs_mx/git/wishfan_fb_login/boilerplate/templates/boilerplate_base_backup.html",
+		"/Users/alexs_mx/git/wishfan_fb_login/boilerplate/templates/boilerplate_base_format.html",
+		"/Users/alexs_mx/git/wishfan_fb_login/boilerplate/templates/boilerplate_contact.html",
+		"/Users/alexs_mx/git/wishfan_fb_login/boilerplate/templates/boilerplate_edit_email.html",
+		"/Users/alexs_mx/git/wishfan_fb_login/boilerplate/templates/boilerplate_edit_password.html",
+		"/Users/alexs_mx/git/wishfan_fb_login/boilerplate/templates/boilerplate_edit_profile.html",
+		"/Users/alexs_mx/git/wishfan_fb_login/boilerplate/templates/boilerplate_login.html",
+		"/Users/alexs_mx/git/wishfan_fb_login/boilerplate/templates/boilerplate_oxxo_formato_pago.html",
+		"/Users/alexs_mx/git/wishfan_fb_login/boilerplate/templates/boilerplate_password_reset.html",
+		"/Users/alexs_mx/git/wishfan_fb_login/boilerplate/templates/boilerplate_password_reset_complete.html",
+		"/Users/alexs_mx/git/wishfan_fb_login/boilerplate/templates/boilerplate_register.html",
+		"/Users/alexs_mx/git/wishfan_fb_login/boilerplate/tests.py",
+		"/Users/alexs_mx/Library/Application Support/Sublime Text 2/Packages/User/EncodingHelper.sublime-settings",
+		"/Users/alexs_mx/Library/Application Support/Sublime Text 2/Packages/EncodingHelper/EncodingHelper.sublime-settings",
+		"/Users/alexs_mx/Library/Application Support/Sublime Text 2/Packages/Package Control/Package Control.sublime-settings",
+		"/Users/alexs_mx/git/wishfan_fb_login/routes.py",
+		"/Users/alexs_mx/git/wishfan_fb_login/static/css/ wishfanstyle.css",
+		"/Users/alexs_mx/git/wishfan_fb_login/links_to_used_resources.txt",
+		"/Users/alexs_mx/git/wishfan_fb_login/web/handlers.py",
+		"/Users/alexs_mx/git/wishfan_fb_login/boilerplate/lib/i18n.py",
+		"/Users/alexs_mx/git/wishfan_fb_login/boilerplate/forms.py",
+		"/Users/alexs_mx/git/wishfan_fb_login/boilerplate/static/img/social-login-icons.png",
 		"/Users/alexs_mx/Dropbox/banwire/PAGO-PRO/API_PAGO-PRO.php",
 		"/Users/alexs_mx/Dropbox/banwire/banwire",
 		"/Users/alexs_mx/Dropbox/codigo_frecuencias/code/SP_Cod_frec_algoritmo.txt",
@@ -181,7 +408,7 @@
 	],
 	"find":
 	{
-		"height": 35.0
+		"height": 36.0
 	},
 	"find_in_files":
 	{
@@ -195,118 +422,134 @@
 		"case_sensitive": false,
 		"find_history":
 		[
-			"encode",
-			"SC",
-			"sc",
-			"ContactHandler",
-			"private",
-			"fbuserid",
-			"private",
-			"routes",
-			"fb.ui",
-			"image_url",
-			"SingleItemCampaing",
-			"image_url",
-			"SingleItemCampaing",
-			"NewDbProductCampaignHandler",
-			"sendFBLoginDataToServer",
-			"nDataToServer",
-			"sendfblogindata",
-			"connected",
-			"getLoginStatus",
-			"fb.logout",
-			"single",
-			"SingleItemCampaing",
-			"LogVisit",
-			"timestamp",
-			"publishinfaceb",
-			"fblogindata2\\\\.",
-			"loginfacebook",
-			"fblogindata",
-			"form",
+			"launch",
 			"facebook",
-			"css",
-			"PrivateProductsHandler",
-			"form",
-			"url",
-			"@",
-			"                ",
-			"user.name",
-			"                ",
-			"ui",
-			"fecha",
-			"datepicker",
-			"elegirregalo",
-			"thumbnail",
-			"\"/>\n",
-			"url",
-			"li",
-			"age",
-			"Login",
-			"login",
-			"auth-loginlink",
-			"auth-logoutlink",
-			"logout",
-			"auth-loginlink",
-			"login",
-			"tabs",
-			"LoginFacebookHandler",
-			"fblogindata",
-			"                    <button onclick=\"$('#fblogindata').submit(); \" class=\"btn btn-primary btn-login\">{% trans %}Entrar{% endtrans %}</button>                    <button onclick=\"$('#fblogindata').submit(); \" class=\"btn btn-primary btn-login\">{% trans %}Entrar{% endtrans %}</button>\n               fblogindata",
-			"                    <button onclick=\"$('#fblogindata').submit(); \" class=\"btn btn-primary btn-login\">{% trans %}Entrar{% endtrans %}</button>                    <button onclick=\"$('#fblogindata').submit(); \" class=\"btn btn-primary btn-login\">{% trans %}Entrar{% endtrans %}</button>\n                fblogindata",
-			"l_user_id",
+			"alexs_mx",
+			"def render_template",
 			"render_template",
 			"render",
-			"channel",
-			"logging",
-			"MASONRY",
-			"block",
-			"logout",
-			"logout_url",
-			"logout",
-			"EditProfileHandler",
-			"auth_id",
-			"db_user",
-			"utils.encry",
-			"id",
-			"self.request",
-			"csrf_token",
-			"post",
-			"logging",
-			"Access was denied to this",
-			"access denied",
-			"acces denied",
-			"acced denied",
-			"get_by_auth_id",
-			"auth-loginlink",
-			"LoginHandler",
-			"loginhandler",
-			"auth-status",
+			"a",
+			"count",
 			"facebook",
-			"twitter",
-			">\n",
-			"federate",
-			"provider",
-			"provider_info",
-			"facebook",
-			"brand",
-			"ie7",
-			"ie8",
-			"ie7",
-			"login",
-			"page",
-			"body",
+			"request",
+			"PaymentHandler",
+			"isrevisit",
+			"first_product",
+			"first_vi",
+			"first_product",
 			"home",
-			"login",
-			"body",
-			"brand",
-			"route",
-			"secure_scheme",
-			"h2",
-			"bazzar",
-			"                            <",
-			"<img",
-			"webapp2_config"
+			"private",
+			"bootstrap",
+			"pass",
+			"ajax",
+			"self.user",
+			"participatehandler",
+			"unique",
+			"paypalcancel",
+			"url",
+			"url_",
+			"sendpaymentt",
+			"concluir pa",
+			"mymodal",
+			"continuar",
+			"models.ItemEvent.temp_id==",
+			"<form",
+			"form",
+			"publishonfb",
+			"publishonfvb",
+			"<i",
+			"ui",
+			"no me ",
+			"publicarEvento",
+			"format",
+			"monto",
+			"config",
+			"meta",
+			"registrar_evento",
+			"descripcion",
+			"la meta debe",
+			"REVISITED",
+			"datepicker",
+			"paso",
+			"saved",
+			"datepicker",
+			"get_by_id",
+			"models.ItemEvent.get",
+			"  && ",
+			" and",
+			"and",
+			"producto",
+			"session",
+			"return_url",
+			"redirect",
+			"PaypalAdaptivePayment",
+			"paypal_sandbox_enabled",
+			"submitBtn",
+			"except Exception as e",
+			"except",
+			"PaymentHandler",
+			"profile_picture",
+			"timeout",
+			"get_object",
+			"profile_picture",
+			"get_object",
+			"picture",
+			"self.user",
+			"launch",
+			"myModal",
+			"removenumericcomma",
+			"remove",
+			"!$.isNumber",
+			"isnumeric",
+			"elseif",
+			"Cumple",
+			"sendPaymentTC",
+			"publish",
+			"private",
+			"gethashkey",
+			"str(",
+			"wishfa",
+			"wish",
+			"wishfan",
+			"simplejson",
+			"socal",
+			"facebook",
+			"PagoOxxo",
+			"user",
+			"LOADS",
+			"base_layout",
+			"get_base_layout",
+			"render",
+			"tmp_id",
+			"datos_pago_oxxo",
+			"modal",
+			"json",
+			"image_upload",
+			"form",
+			"profile_picture",
+			"profile_picture_",
+			"profile_picture",
+			"models.socialUser",
+			"covers",
+			"models.SocialUser(",
+			"user_data",
+			"/me",
+			"updateTmpImageWithUser",
+			"payment",
+			"updateTmpImageWithUser",
+			"payment",
+			"option1",
+			"oxxo",
+			"tabs",
+			"publishOnFb",
+			"url",
+			"url_for",
+			"publish",
+			"enviar",
+			"registrarUsuario",
+			"FIRST",
+			"volverApaso",
+			"volverAPaso2"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -314,6 +557,8 @@
 		"regex": false,
 		"replace_history":
 		[
+			"isNumber",
+			"ndb"
 		],
 		"reverse": false,
 		"show_context": true,
@@ -324,33 +569,67 @@
 	"groups":
 	[
 		{
-			"selected": 0,
+			"selected": 1,
 			"sheets":
 			[
 				{
 					"buffer": 0,
-					"file": "app.yaml",
+					"file": "boilerplate/handlers.py",
 					"settings":
 					{
-						"buffer_size": 2037,
+						"buffer_size": 95016,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								0,
-								0
+								16685,
+								16694
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/YAML/YAML.tmLanguage",
-							"tab_size": 2,
+							"encoding_helper_confidence": 0.99,
+							"encoding_helper_encoding": "GB2312",
+							"encoding_helper_encoding_sublime": "UTF-8",
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"tab_size": 4,
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 6710.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 0,
+					"file": "boilerplate/handlers.py",
+					"settings":
+					{
+						"buffer_size": 95016,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								11006,
+								11006
+							]
+						],
+						"settings":
+						{
+							"encoding_helper_confidence": 0.99,
+							"encoding_helper_encoding": "GB2312",
+							"encoding_helper_encoding_sublime": "UTF-8",
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 4863.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -395,7 +674,7 @@
 	},
 	"replace":
 	{
-		"height": 0.0
+		"height": 64.0
 	},
 	"save_all_on_build": true,
 	"select_file":
@@ -404,16 +683,160 @@
 		"selected_items":
 		[
 			[
-				"contact",
-				"templates/boilerplate_contact.html"
+				"han",
+				"boilerplate/handlers.py"
+			],
+			[
+				"partici",
+				"boilerplate/templates/boilerplate_participate_in_event.html"
+			],
+			[
+				"participa",
+				"boilerplate/templates/boilerplate_participate_in_event.html"
+			],
+			[
+				"home",
+				"boilerplate/templates/boilerplate_home.html"
 			],
 			[
 				"rout",
-				"routes_presentacion.py"
+				"boilerplate/routes.py"
+			],
+			[
+				"basen",
+				"boilerplate/lib/basehandler.py"
+			],
+			[
+				"hand",
+				"boilerplate/handlers.py"
+			],
+			[
+				"handler",
+				"boilerplate/handlers.py"
+			],
+			[
+				"pay",
+				"boilerplate/templates/boilerplate_pay_event.html"
+			],
+			[
+				"model",
+				"boilerplate/models.py"
+			],
+			[
+				"first",
+				"boilerplate/templates/boilerplate_first_product.html"
+			],
+			[
+				"private",
+				"boilerplate/templates/boilerplate_private_products.html"
+			],
+			[
+				"base",
+				"boilerplate/templates/boilerplate_base.html"
+			],
+			[
+				"bas",
+				"boilerplate/templates/boilerplate_base.html"
+			],
+			[
+				"filter",
+				"boilerplate/mycustfilters.py"
+			],
+			[
+				"baseh",
+				"boilerplate/lib/basehandler.py"
+			],
+			[
+				"config",
+				"boilerplate/config.py"
 			],
 			[
 				"route",
+				"boilerplate/routes.py"
+			],
+			[
+				"parti",
+				"boilerplate/templates/boilerplate_participate_in_event.html"
+			],
+			[
+				"models",
+				"boilerplate/models.py"
+			],
+			[
+				"priv",
+				"boilerplate/templates/boilerplate_private_products.html"
+			],
+			[
+				"app",
+				"app.yaml"
+			],
+			[
+				"faceb",
+				"boilerplate/lib/facebook.py"
+			],
+			[
+				"basehandler",
+				"boilerplate/lib/basehandler.py"
+			],
+			[
+				"util",
+				"boilerplate/lib/utils.py"
+			],
+			[
+				"appcon",
+				"appengine_config.py"
+			],
+			[
+				"handle",
+				"boilerplate/handlers.py"
+			],
+			[
+				"priva",
+				"boilerplate/templates/boilerplate_private_products.html"
+			],
+			[
+				"routes",
 				"routes.py"
+			],
+			[
+				"handl",
+				"boilerplate/handlers.py"
+			],
+			[
+				"yaml",
+				"app.yaml"
+			],
+			[
+				"rou",
+				"boilerplate/routes.py"
+			],
+			[
+				"boil",
+				"boilerplate/templates/boilerplate_base.html"
+			],
+			[
+				"mod",
+				"boilerplate/models.py"
+			],
+			[
+				"face",
+				"boilerplate/lib/facebook.py"
+			],
+			[
+				"confi",
+				"boilerplate/config.py"
+			],
+			[
+				"contact",
+				"boilerplate/templates/boilerplate_contact.html"
+			],
+			[
+				"mode",
+				"boilerplate/models.py"
+			],
+			[
+				"test",
+				"boilerplate/templates/test.html"
 			],
 			[
 				"cont",
@@ -424,72 +847,16 @@
 				"templates/boilerplate_contact.html"
 			],
 			[
-				"config",
-				"config.py"
-			],
-			[
 				"reg",
 				"templates/boilerplate_regalos.html"
-			],
-			[
-				"handl",
-				"web/handlers.py"
-			],
-			[
-				"first",
-				"templates/boilerplate_first_product.html"
-			],
-			[
-				"handler",
-				"web/handlers.py"
 			],
 			[
 				"basehan",
 				"lib/basehandler.py"
 			],
 			[
-				"handle",
-				"web/handlers.py"
-			],
-			[
-				"hand",
-				"web/handlers.py"
-			],
-			[
-				"priva",
-				"templates/boilerplate_private_products.html"
-			],
-			[
-				"model",
-				"models/models.py"
-			],
-			[
-				"rou",
-				"routes.py"
-			],
-			[
 				"fisrt",
 				"templates/boilerplate_first_product.html"
-			],
-			[
-				"base",
-				"templates/base.html"
-			],
-			[
-				"home",
-				"templates/boilerplate_home.html"
-			],
-			[
-				"mode",
-				"models/models.py"
-			],
-			[
-				"baseh",
-				"lib/basehandler.py"
-			],
-			[
-				"priv",
-				"templates/boilerplate_private_products.html"
 			],
 			[
 				"main",
@@ -502,26 +869,6 @@
 			[
 				"css",
 				"static/css/main.css"
-			],
-			[
-				"confi",
-				"config.py"
-			],
-			[
-				"app",
-				"app.yaml"
-			],
-			[
-				"private",
-				"templates/boilerplate_private_products.html"
-			],
-			[
-				"bas",
-				"templates/base.html"
-			],
-			[
-				"mod",
-				"models/models.py"
 			],
 			[
 				"arout",
@@ -590,6 +937,6 @@
 	"show_open_files": true,
 	"show_tabs": true,
 	"side_bar_visible": true,
-	"side_bar_width": 335.0,
+	"side_bar_width": 260.0,
 	"status_bar_visible": true
 }

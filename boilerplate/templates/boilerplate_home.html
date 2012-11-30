@@ -1,4 +1,4 @@
-{% extends base_layout %}
+<?xml version="1.0" encoding="utf-8"?>{% extends base_layout %}
 
 {% block header_title_lead %}{% endblock %}
 
@@ -28,6 +28,8 @@
             <form id="form_login_user" action="{{ uri_for("login") }}" method="post">
                 <fieldset class="well">
                     {{ macros.federated_login(provider_info, provider_uris, enable_federated_login) }}
+                    {% if False %}
+                    <div id="user-name"></div>
                     <h4>O tu usuario registrado:</h4>
                     <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                     <div class="control-group">
@@ -55,6 +57,7 @@
                     <div>
                         ¿No te has registrado y no quieres usar Facebook? <a href="{{ uri_for("register") }}">Regístrate!</a>
                     </div>
+                    {% endif %}
                 </fieldset>
             </form>
         </div>

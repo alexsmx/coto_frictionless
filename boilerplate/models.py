@@ -31,7 +31,14 @@ class User(User):
     country = ndb.StringProperty()
     #: Account activation verifies email
     activated = ndb.BooleanProperty(default=False)
-
+    #: Referred Events
+    events = ndb.KeyProperty(repeated=True)
+    #: Paypalemail account
+    paypalemail = ndb.StringProperty()
+    #: Paypalemail confirmation
+    paypalemailconfirmationtoken = ndb.StringProperty()
+    #: Paypalemail confirmed
+    paypalemailconfirmed=ndb.StringProperty()
     
     @classmethod
     def get_by_email(cls, email):
@@ -198,17 +205,31 @@ class ItemEvent(ndb.Model):
     monto_contribucion_evento=ndb.StringProperty()
     image_url=ndb.StringProperty()
     visible=ndb.BooleanProperty(default=True)
-    recolectado=ndb.FloatProperty()
+    recolectado=ndb.FloatProperty(default=0)
+    porcentaje_recolectado=ndb.FloatProperty(default=0)
+    participantes= ndb.StringProperty(repeated=True)
+    imagenes_participantes= ndb.StringProperty(repeated=True)
+    facebook_post_ids=ndb.StringProperty(repeated=True)
+    nombre_organizador=ndb.StringProperty()
 
     def getstrkey(self):
         return str(self.key.id())
 
     def gethashkey(self):
-        return utils.hashing(self.key.id(), config.salt)
+        return str(utils.hashing(self.key.id(), config.salt))
 
 class PagoTC(ndb.Model):
     user=ndb.KeyProperty(kind=User)
     evento=ndb.KeyProperty(kind=ItemEvent)
+    bwuser=ndb.StringProperty()
+    bwid=ndb.StringProperty()
+    bwreferencia=ndb.StringProperty()
+    bwdate=ndb.StringProperty()
+    bwcard=ndb.StringProperty()
+    bwresponse=ndb.StringProperty()
+    bwcode_auth=ndb.StringProperty()
+    bwmonto=ndb.StringProperty()
+    bwclient=ndb.StringProperty()
 
 class PagoOxxo(ndb.Model):
     usuario = ndb.StringProperty()
@@ -235,3 +256,32 @@ class PagoOxxo(ndb.Model):
     resp_ref_externa= ndb.StringProperty()
     resp_flag= ndb.StringProperty()
     resp_bc_img=ndb.BlobProperty()
+
+class ConfirmPagoOxxo(ndb.Model):
+    created = ndb.DateTimeProperty(auto_now_add=True)
+    parametros=ndb.TextProperty()
+    
+class ConfirmPagoTC(ndb.Model):
+    created= ndb.DateTimeProperty(auto_now_add=True)
+    parametros=ndb.StringProperty()
+
+class ImportantErrors(ndb.Model):
+    created= ndb.DateTimeProperty(auto_now_add=True)
+    error=ndb.StringProperty()
+    module=ndb.StringProperty()
+
+class PayPalRequest(ndb.Model):
+    user=ndb.KeyProperty(kind=User)
+    evento=ndb.KeyProperty(kind=ItemEvent)
+    created=ndb.DateTimeProperty(auto_now_add=True)
+    modified= ndb.DateTimeProperty(auto_now=True)
+    paypalResponseString=ndb.TextProperty()
+    confirmedPay=ndb.StringProperty()
+    confirmedPayResponseString=ndb.TextProperty()
+    paypalKey=ndb.StringProperty()
+    amount=ndb.StringProperty()
+
+class registerInteraction(ndb.Model):
+    created = ndb.DateTimeProperty(auto_now_add=True)
+    parametros=ndb.TextProperty()
+

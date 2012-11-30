@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+{% block title %}
+        {% trans %}Formato de pago en OXXO{% endtrans %} - {{app_name}}
+{% endblock %}
+{% block header_title %}
+        {% trans %}Formato de Pago{% endtrans %}
+{% endblock %}
+
+{% block content %}
+<h1>{% trans %}Formato de pago en OXXO{% endtrans %} - {{app_name}}</h1>
+    <div class="row">
+        <div class="span4">
+            <table class="table table-hover">
+                <tbody>
+                    <tr><td align="right" colspan=2><div onclick="window.print(); return false; " class="btn btn-success">Imprimir</div></td></tr>
+                    <tr><td>Nombre: </td>
+                        <td ><h3>{{ producto.titulo_evento }}</h3>
+                        </td>
+                    </tr>
+                    <tr><td>Descripción:</td>
+                        <td><i>{{ producto.descripcion_evento }}</i>
+                        </td>
+                    </tr>
+                    <tr><td>Tipo:</td>
+                        <td>
+                            {% if producto.tipo_evento== '1' %}
+                                Cumpleaños 
+                            {% elif producto.tipo_evento=='2' %}
+                                Mesa de Regalos
+                            {% elif producto.tipo_evento=='3' %}
+                                Evento
+                            {% else %}
+                                Otro
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr><td>Fecha:</td>
+                        <td>
+                            {% if producto.fecha_evento|length >0 %}
+                                {{ producto.fecha_evento }}
+                            {% else %}
+                                No tiene fecha asignada.
+                            {% endif %}
+                        </td>
+                    </tr>
+                    
+                </tbody>
+            </table>
+        </div>
+        <div class="span4">
+            <table class="table table-hover">
+                <tr><td>Nombre del Cliente:</td><td>{{ nombre_usuario }}</td></tr>
+                <tr><td>Email del Cliente:</td><td>{{ email }}</td></tr>
+                <tr><td>ID transacción: </td><td>{{ referencia }}</td></tr>
+                <tr><td>Monto a pagar: </td><td>{{ monto }}</td></tr>
+                <tr><td>Fecha de Vencimiento:</td><td>{{ fechavigencia }}</td></tr>
+                <tr><td>Código de Barras:</td><td><img src="/imagenOxxo/?id={{ pago_id }}"></td></tr>
+                <tr><td colspan="2">
+                    Este cupón es válido úncamente para realizar el pago
+                    correspondiente y dentro de la fecha de vigencia establecida.
+                    La acreditación del mismo es a las 24 hrs. de realizado, hasta
+                    entonces el pago podrá ser corroborado por nuestros sistemas.
+                    Cualquier aclaración sobre la compra, favor de comunicarse
+                    con nuestro equipo de ventas a ventas@wishfan.com. <br/><br/>
+                    *Imprime el cupón de manera clara y legible, usa de
+                    preferencia impresora láser, Consérvalo en buen estado sin
+                    tachar ó doblar la parte del código de barras. En caso de no ser
+                    legible, la tienda puede rechazar el pago correspondiente.<br/><br/>
+                    **La Tienda cobrará una comisión de $8.00 MXN por concepto
+                    de pago.
+                </td></tr>
+            </table>
+        </div>
+    </div>
+    
+
+{% endblock %}
+
+{% block mediaJS %}
+<script type="text/javascript">
+ 
+</script>
+{% endblock %}
+

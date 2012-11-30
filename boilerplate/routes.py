@@ -35,8 +35,15 @@ _routes = [
     RedirectRoute('/postEvent/', handlers.PostEvent, name='post_event', strict_slash=True),
     RedirectRoute('/deleteEvent/', handlers.DeleteEvent, name='delete_event', strict_slash=True),
     RedirectRoute('/participateInEvent/', handlers.ParticipateHandler, name='participate_in_event', strict_slash=True),
-    RedirectRoute('/pagar/', handlers.PaymentHandler, name='pay_for_event', strict_slash=True)
-
+    RedirectRoute('/pagar/', handlers.PaymentHandler, name='pay_for_event', strict_slash=True),
+    RedirectRoute('/oxxoformat/', handlers.OxxoFormatHandler, name='oxxoformat', strict_slash=True),
+    RedirectRoute('/confirmacionPago/', handlers.ConfirmacionPago, name='confirmacion_pago', strict_slash=True)  ,
+    RedirectRoute('/imagenOxxo/', handlers.imagenOxxo, name='imagenOxxo', strict_slash=True),
+    RedirectRoute('/paypal/', handlers.paypalHandler, name='paypal', strict_slash=True),
+    RedirectRoute('/paypalcancel/', handlers.paypalCancelHandler, name='paypalcancel', strict_slash=True),
+    RedirectRoute('/paypalsuccess/', handlers.paypalSuccessHandler, name='paypalsuccess', strict_slash=True),
+    RedirectRoute('/facebookPostSuccess/', handlers.facebookPostSuccess, name='facebookpostsuccess', strict_slash=True),
+    RedirectRoute('/registerInteraction/', handlers.registerInteraction, name='register_interaction', strict_slash=True),
 ]
 
 def get_routes():

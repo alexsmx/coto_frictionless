@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>{% extends base_layout %}
+{% block title %}
+        {% trans %}Error{% endtrans %} - {{app_name}}
+{% endblock %}
+{% block navbar %}
+{% endblock %}
+{% block header_title %}
+        {% trans %}Error en Pago{% endtrans %}
+{% endblock %}
+
+
+{% block content %}
+<div class="row">
+  <div class="well">
+    <div class="btn btn-danger" onclick="close_paypal_dialog(); return false; ">
+        El pago fue cancelado o erróneo.
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block mediaJS %}
+<script type="text/javascript" src="https://www.paypalobjects.com/js/external/dg.js"></script>
+ <script type="text/javascript">
+    function close_paypal_dialog(){
+        if (top && top.opener && top.opener.top && top.opener.top.dgFlow) {
+          top.opener.top.dgFlow.closeFlow();
+        } else {
+          top.dgFlow.closeFlow();
+        }
+    }
+
+    $(document).ready(function() {
+        
+    });
+  </script>
+{% endblock %}
